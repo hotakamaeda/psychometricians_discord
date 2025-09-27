@@ -1,0 +1,4 @@
+.env
+seen_articles.json
+/source/archive
+/.idea
