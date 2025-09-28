@@ -394,14 +394,14 @@ def attach_real_links(text: str, all_items: list[dict]) -> str:
 # Main
 # -----------------------------
 def main():
-    # # Monday-only guard
-    # if datetime.today().weekday() != 0:  # Monday=0
-    #     print("[i] Not Monday → skipping digest.")
-    #     return
+    # Monday-only guard
+    if datetime.today().weekday() != 0:  # Monday=0
+        print("[i] Not Monday → skipping digest.")
+        return
 
     print("[i] harvesting news…")
     all_items = harvest_articles(SEARCH_TERMS)
-    print(f"[i] harvested {len(all_items)} articles total:")
+    # print(f"[i] harvested {len(all_items)} articles total:")
     # if all_items:
     #     print(all_items[0])
 
