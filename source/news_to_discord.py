@@ -232,6 +232,7 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
         "Prioritize: policy, legislation, politics, testing reforms, professional society updates, licensure/career news, "
         "and media coverage. De-emphasize technical validation studies unless directly relevant. "
         "Summarize the important news and trends in a paragraph for each time window. "
+        "Specify the country being discussed. Focus on United States but include some international news. "
         "Many articles will be recent articles, so pay attention to the published dates and make sure your summary covers the entire timeframe."
         "\n\n"
         "Output format rules:\n"
@@ -269,7 +270,7 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
                     {"role": "system", "content": system},
                     {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
                 ],
-                # temperature=0.25, # gpt-5-nano doesnt have temperature
+                temperature=0.25, # gpt-5-nano doesnt have temperature
                 service_tier="flex",
             )
             break  # success
@@ -285,7 +286,7 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
                 {"role": "system", "content": system},
                 {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
             ],
-            # temperature=0.25, # gpt-5-nano doesnt have temperature
+            temperature=0.25, # gpt-5-nano doesnt have temperature
             service_tier="default",
         )
 
@@ -314,7 +315,7 @@ def post_to_discord(webhook_url: str, content: str):
     # Send each chunk
     for i, chunk in enumerate(chunks, 1):
         msg = chunk
-        # print(msg)
+        print(msg)
         # if len(chunks) > 1:
         #     msg = f"**Part {i}/{len(chunks)}**\n{msg}"
 
@@ -420,19 +421,19 @@ def main():
         "last_365_days_excluding_past_60_days": make_prompt_payload("last_365_days_excluding_past_60_days", last_365, False),
     }
 
-    # # Debug by dumping json.
-    # with open("harvest_debug7.json", "w", encoding="utf-8") as f:
-    #     json.dump(last_7, f, ensure_ascii=False, indent=2)
-    # print(f"{len(last_7)} articles written to harvest_debug7.json")
-    # with open("harvest_debug60.json", "w", encoding="utf-8") as f:
-    #     json.dump(last_60, f, ensure_ascii=False, indent=2)
-    # print(f"{len(last_60)} articles written to harvest_debug60.json")
-    # with open("harvest_debug365.json", "w", encoding="utf-8") as f:
-    #     json.dump(last_365, f, ensure_ascii=False, indent=2)
-    # print(f"{len(last_365)} articles written to harvest_debug365.json")
-    # with open("harvest_debugwindows_payload.json", "w", encoding="utf-8") as f:
-    #     json.dump(windows_payload, f, ensure_ascii=False, indent=2)
-    # print(f"written to harvest_debugwindows_payload.json")
+    # Debug by dumping json.
+    with open("harvest_debug7.json", "w", encoding="utf-8") as f:
+        json.dump(last_7, f, ensure_ascii=False, indent=2)
+    print(f"{len(last_7)} articles written to harvest_debug7.json")
+    with open("harvest_debug60.json", "w", encoding="utf-8") as f:
+        json.dump(last_60, f, ensure_ascii=False, indent=2)
+    print(f"{len(last_60)} articles written to harvest_debug60.json")
+    with open("harvest_debug365.json", "w", encoding="utf-8") as f:
+        json.dump(last_365, f, ensure_ascii=False, indent=2)
+    print(f"{len(last_365)} articles written to harvest_debug365.json")
+    with open("harvest_debugwindows_payload.json", "w", encoding="utf-8") as f:
+        json.dump(windows_payload, f, ensure_ascii=False, indent=2)
+    print(f"written to harvest_debugwindows_payload.json")
     # # Stop execution here
     # raise SystemExit("[i] Stopping early for manual inspection")
     # # raise
