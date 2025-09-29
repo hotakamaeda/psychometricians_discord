@@ -11,10 +11,12 @@ from itertools import groupby
 import requests
 import feedparser
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+load_dotenv()  # loads .env in the same directory
 
 # ========== CONFIG ==========
 
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1421185226809540639/RBnYEvbkPYw-XWDcp9VVBFVmLZZkffXI8bXtO9lZMs3QLaskHmXu6QttjPGnVGEYd4FU"
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_PAPERS")
 
 # Journals: either RSS (if available) or fallback scrape URL.
 # You must fill or verify the fallback scrape URLs.

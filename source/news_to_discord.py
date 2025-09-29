@@ -26,7 +26,7 @@ import string
 load_dotenv()  # loads .env in the same directory
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_NEWS")
 # OPENAI_MODEL = "gpt-5-nano"
 OPENAI_MODEL = "gpt-5-mini"
 
