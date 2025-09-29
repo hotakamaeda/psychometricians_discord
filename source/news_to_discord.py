@@ -292,10 +292,16 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
 
     # Extract text output
     parts = []
-    for o in resp.output:
-        for c in getattr(o, "content", []):
-            if c.type == "output_text":
-                parts.append(c.text)
+    # Preferred: direct output_text if available
+    if hasattr(resp, "output_text") and resp.output_text:
+        parts.append(resp.output_text)
+    # Fallback: loop through structured outputs
+    elif hasattr(resp, "output") and resp.output:
+        for o in resp.output:
+            if hasattr(o, "content") and o.content:
+                for c in o.content:
+                    if c.type == "output_text":
+                        parts.append(c.text)
     return "\n".join(parts).strip()
 
 def post_to_discord(webhook_url: str, content: str):
