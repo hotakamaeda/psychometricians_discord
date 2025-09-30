@@ -21,6 +21,10 @@ DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_PAPERS")
 # Journals: either RSS (if available) or fallback scrape URL.
 # You must fill or verify the fallback scrape URLs.
 JOURNAL_SOURCES = {
+    "Computers and Education: Artificial Intelligence (CAEAI)": {
+        "rss": "https://rss.sciencedirect.com/publication/science/2666920X",
+        "scrape": "https://www.sciencedirect.com/journal/computers-and-education-artificial-intelligence/vol/9/suppl/C"  # Example “current issue” page
+    },
     "Chinese/English Journal of Educational Measurement and Evaluation (CEJEME)": {
         "rss": "https://www.ce-jeme.org/journal/recent.rss",
         "scrape": "https://www.ce-jeme.org/"  # Example “current issue” page
