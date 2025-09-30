@@ -2,3 +2,5 @@
 seen_articles.json
 /source/archive
 /.idea
+sent_emails.json
+token_cache.json
