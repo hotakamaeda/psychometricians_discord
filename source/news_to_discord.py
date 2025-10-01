@@ -456,7 +456,7 @@ def main():
     # report = wrap_links_with_angle_brackets(report)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    header = f"# Monday News Digest\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(all_items)} Articles"
+    header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(all_items)} Articles"
     report_txt = header + report
 
     if DISCORD_WEBHOOK_URL:
