@@ -29,9 +29,9 @@ async def on_message(message):
         if not (has_attachment or has_link):
             await message.delete()
             await message.channel.send(
-                f"Hey {message.author.mention}! This channel is for sharing your papers, presentations, and programs! "
-                f"Please __include a link or attachment__, title, and authors of your work! "
-                f"To start a discussion instead, right click a post and create a thread!! :hippopotamus:",
+                f"Hey {message.author.mention}! This channel is for sharing **papers, presentations, and programs.**\n"
+                f"✅ Please __include a link or attachment__ plus optional title & authors of your work!\n"
+                f"💬 Want to discuss instead? Right-click a post and create a thread! :hippopotamus:",
                 delete_after=60
             )
 
