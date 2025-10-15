@@ -16,107 +16,107 @@ load_dotenv()  # loads .env in the same directory
 
 # ========== CONFIG ==========
 
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_PAPERS")
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_PAPERS2")
 
 # Journals: either RSS (if available) or fallback scrape URL.
 # You must fill or verify the fallback scrape URLs.
 JOURNAL_SOURCES = {
-    # "Computers and Education: Artificial Intelligence (CAEAI)": {
-    #     "rss": "https://rss.sciencedirect.com/publication/science/2666920X",
-    #     "scrape": "https://www.sciencedirect.com/journal/computers-and-education-artificial-intelligence/vol/9/suppl/C"  # Example “current issue” page
-    # },
-    # "Chinese/English Journal of Educational Measurement and Evaluation (CEJEME)": {
-    #     "rss": "https://www.ce-jeme.org/journal/recent.rss",
-    #     "scrape": "https://www.ce-jeme.org/"  # Example “current issue” page
-    # },
-    # "Journal of Educational Computing Research (JECR)": {
-    #     "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=jec&type=axatoc&feed=rss",
-    #     "scrape": "https://journals.sagepub.com/connected/jec"  # Example “current issue” page
-    # },
-    "Educational Measurement: Issues and Practice (EM:IP)": {
-        "rss": "https://onlinelibrary.wiley.com/feed/17453992/most-recent",
-        "scrape": "https://onlinelibrary.wiley.com/journal/17453992"  # Example “current issue” page
+    "Computers and Education: Artificial Intelligence (CAEAI)": {
+        "rss": "https://rss.sciencedirect.com/publication/science/2666920X",
+        "scrape": "https://www.sciencedirect.com/journal/computers-and-education-artificial-intelligence/vol/9/suppl/C"  # Example “current issue” page
     },
-    "Educational and Psychological Measurement (EPM)": {
-        "rss": "https://journals.sagepub.com/action/showFeed?type=etoc&feed=rss&jc=epm",
-        "scrape": "https://journals.sagepub.com/toc/epma/current"  # Example “current issue” page
+    "Chinese/English Journal of Educational Measurement and Evaluation (CEJEME)": {
+        "rss": "https://www.ce-jeme.org/journal/recent.rss",
+        "scrape": "https://www.ce-jeme.org/"  # Example “current issue” page
     },
-    "Psychometrika": {
-        "rss": "https://www.cambridge.org/core/rss/product/id/103E7D27F001B3B09BE8FD6800A549BA",
-        "scrape": "https://link.springer.com/journal/11336/online-first"  # “Online first / latest articles” page
+    "Journal of Educational Computing Research (JECR)": {
+        "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=jec&type=axatoc&feed=rss",
+        "scrape": "https://journals.sagepub.com/connected/jec"  # Example “current issue” page
     },
-    "Applied Psychological Measurement (APM)": {
-        "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=apm&type=axatoc&feed=rss",
-        "scrape": "https://journals.sagepub.com/toc/apm/current"
+    # "Educational Measurement: Issues and Practice (EM:IP)": {
+    #     "rss": "https://onlinelibrary.wiley.com/feed/17453992/most-recent",
+    #     "scrape": "https://onlinelibrary.wiley.com/journal/17453992"  # Example “current issue” page
+    # },
+    # "Educational and Psychological Measurement (EPM)": {
+    #     "rss": "https://journals.sagepub.com/action/showFeed?type=etoc&feed=rss&jc=epm",
+    #     "scrape": "https://journals.sagepub.com/toc/epma/current"  # Example “current issue” page
+    # },
+    # "Psychometrika": {
+    #     "rss": "https://www.cambridge.org/core/rss/product/id/103E7D27F001B3B09BE8FD6800A549BA",
+    #     "scrape": "https://link.springer.com/journal/11336/online-first"  # “Online first / latest articles” page
+    # },
+    # "Applied Psychological Measurement (APM)": {
+    #     "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=apm&type=axatoc&feed=rss",
+    #     "scrape": "https://journals.sagepub.com/toc/apm/current"
+    # },
+    # "Journal of Educational Measurement (JEM)": {
+    #     "rss": "https://onlinelibrary.wiley.com/feed/17453984/most-recent",
+    #     "scrape": "https://onlinelibrary.wiley.com/journal/17453984"  # Wiley’s journal page (latest articles listed)
+    # },
+    # "Journal of Educational and Behavioral Statistics (JEBS)": {
+    #     "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=jeb&type=axatoc&feed=rss",
+    #     "scrape": "https://journals.sagepub.com/toc/jeba/current"
+    # },
+    "Multivariate Behavioral Research (MBR)": {
+        "rss": "https://www.tandfonline.com/feed/rss/hmbr20",
+        "scrape": "https://www.tandfonline.com/toc/pmbr20/current"
     },
-    "Journal of Educational Measurement (JEM)": {
-        "rss": "https://onlinelibrary.wiley.com/feed/17453984/most-recent",
-        "scrape": "https://onlinelibrary.wiley.com/journal/17453984"  # Wiley’s journal page (latest articles listed)
+    "Structural Equation Modeling (SEM)": {
+        "rss": "https://www.tandfonline.com/feed/rss/hsem20",
+        "scrape": "https://www.tandfonline.com/toc/hsem20/current"
     },
-    "Journal of Educational and Behavioral Statistics (JEBS)": {
-        "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=jeb&type=axatoc&feed=rss",
-        "scrape": "https://journals.sagepub.com/toc/jeba/current"
+    "Assessment": {
+        "rss": "https://journals.sagepub.com/action/showFeed?type=etoc&feed=rss&jc=asma",
+        "scrape": "https://journals.sagepub.com/toc/asma/current"
     },
-    # "Multivariate Behavioral Research (MBR)": {
-    #     "rss": "https://www.tandfonline.com/feed/rss/hmbr20",
-    #     "scrape": "https://www.tandfonline.com/toc/pmbr20/current"
-    # },
-    # "Structural Equation Modeling (SEM)": {
-    #     "rss": "https://www.tandfonline.com/feed/rss/hsem20",
-    #     "scrape": "https://www.tandfonline.com/toc/hsem20/current"
-    # },
-    # "Assessment": {
-    #     "rss": "https://journals.sagepub.com/action/showFeed?type=etoc&feed=rss&jc=asma",
-    #     "scrape": "https://journals.sagepub.com/toc/asma/current"
-    # },
-    # "Journal of Personality Assessment (JPA)": {
-    #     "rss": "https://www.tandfonline.com/feed/rss/hjpa20",
-    #     "scrape": "https://www.tandfonline.com/toc/hjpa20/current"
-    # },
-    "Applied Measurement in Education (AME)": {
-        "rss": "https://www.tandfonline.com/feed/rss/hame20",
-        "scrape": "https://www.tandfonline.com/toc/hame20/current"
+    "Journal of Personality Assessment (JPA)": {
+        "rss": "https://www.tandfonline.com/feed/rss/hjpa20",
+        "scrape": "https://www.tandfonline.com/toc/hjpa20/current"
     },
-    "Educational Assessment": {
-        "rss": "https://www.tandfonline.com/feed/rss/heda20",
-        "scrape": "https://www.tandfonline.com/toc/heda20/current"
+    # "Applied Measurement in Education (AME)": {
+    #     "rss": "https://www.tandfonline.com/feed/rss/hame20",
+    #     "scrape": "https://www.tandfonline.com/toc/hame20/current"
+    # },
+    # "Educational Assessment": {
+    #     "rss": "https://www.tandfonline.com/feed/rss/heda20",
+    #     "scrape": "https://www.tandfonline.com/toc/heda20/current"
+    # },
+    # "Large-scale Assessments in Education": {
+    #     "rss": "https://largescaleassessmentsineducation.springeropen.com/articles/most-recent/rss.xml",
+    #     "scrape": "https://largescaleassessmentsineducation.springeropen.com/"
+    # },
+    "Educational Assessment, Evaluation and Accountability": {
+        "rss": None,
+        "scrape": "https://link.springer.com/journal/11092/online-first"
     },
-    "Large-scale Assessments in Education": {
-        "rss": "https://largescaleassessmentsineducation.springeropen.com/articles/most-recent/rss.xml",
-        "scrape": "https://largescaleassessmentsineducation.springeropen.com/"
+    "International Journal of Artificial Intelligence in Education (IJAIED)": {
+        "rss": None,
+        "scrape": "https://link.springer.com/journal/40593/online-first"
     },
-    # "Educational Assessment, Evaluation and Accountability": {
-    #     "rss": None,
-    #     "scrape": "https://link.springer.com/journal/11092/online-first"
-    # },
-    # "International Journal of Artificial Intelligence in Education (IJAIED)": {
-    #     "rss": None,
-    #     "scrape": "https://link.springer.com/journal/40593/online-first"
-    # },
-    # "Journal of Learning Analytics (JLA)": {
-    #     "rss": None,
-    #     "scrape": "https://learning-analytics.info/index.php/JLA/issue/current"
-    # },
-    # "Journal of Educational Data Mining (JEDM)": {
-    #     "rss": None,
-    #     "scrape": "https://jedm.educationaldatamining.org/index.php/JEDM/issue/current"
-    # },
-    # "Computers & Education": {
-    #     "rss": "https://rss.sciencedirect.com/publication/science/03601315",
-    #     "scrape": "https://www.sciencedirect.com/journal/computers-and-education"  # Latest articles listed here
-    # },
-    # "British Journal of Educational Technology (BJET)": {
-    #     "rss": 'https://bera-journals.onlinelibrary.wiley.com/feed/14678535/most-recent',
-    #     "scrape": "https://bera-journals.onlinelibrary.wiley.com/journal/14678535"  # Wiley’s journal homepage
-    # },
-    # "IEEE Transactions on Learning Technologies (TLT)": {
-    #     "rss": "https://ieeexplore.ieee.org/rss/TOC69.XML",
-    #     "scrape": "https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=69"  # adjust for TLT’s ISSN/identifier
-    # },
-    # "Frontiers in Education (Assessment, Testing & Measurement section)": {
-    #     "rss": "https://www.frontiersin.org/journals/education/sections/assessment-testing-and-applied-measurement/rss",
-    #     "scrape": "https://www.frontiersin.org/journals/education/sections/assessment-testing-and-applied-measurement/latest"
-    # }
+    "Journal of Learning Analytics (JLA)": {
+        "rss": None,
+        "scrape": "https://learning-analytics.info/index.php/JLA/issue/current"
+    },
+    "Journal of Educational Data Mining (JEDM)": {
+        "rss": None,
+        "scrape": "https://jedm.educationaldatamining.org/index.php/JEDM/issue/current"
+    },
+    "Computers & Education": {
+        "rss": "https://rss.sciencedirect.com/publication/science/03601315",
+        "scrape": "https://www.sciencedirect.com/journal/computers-and-education"  # Latest articles listed here
+    },
+    "British Journal of Educational Technology (BJET)": {
+        "rss": 'https://bera-journals.onlinelibrary.wiley.com/feed/14678535/most-recent',
+        "scrape": "https://bera-journals.onlinelibrary.wiley.com/journal/14678535"  # Wiley’s journal homepage
+    },
+    "IEEE Transactions on Learning Technologies (TLT)": {
+        "rss": "https://ieeexplore.ieee.org/rss/TOC69.XML",
+        "scrape": "https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=69"  # adjust for TLT’s ISSN/identifier
+    },
+    "Frontiers in Education (Assessment, Testing & Measurement section)": {
+        "rss": "https://www.frontiersin.org/journals/education/sections/assessment-testing-and-applied-measurement/rss",
+        "scrape": "https://www.frontiersin.org/journals/education/sections/assessment-testing-and-applied-measurement/latest"
+    }
 }
 
 REQUIRED_KEYWORDS = ["item response", "assessment", "psychometric", "measurement", "standardized test"]
@@ -124,22 +124,22 @@ ALLOWED_ARXIV_PREFIXES = ("math.", "stat.", "cs.")
 
 # Preprint (only via APIs / fetchers, as before)
 PREPRINT_SOURCES = {
-    "arXiv": {
-        "type": "arxiv",
-        "keywords": [
-            "item response", "IRT", "differential item functioning",
-            "measurement invariance", "test equating", "psychometric",
-            "latent trait", "rasch model", "graded response model",
-            "1PL", "2PL", "3PL", "4PL", "parameter logistic model",
-            "educational assessment","psychological assessment",
-            "multidimensional IRT", "test linking", "test calibration",
-            "educational measurement", "assessment validity", "fairness in testing",
-            "item generation", "classical test theory",
-            "item parameter", "item difficulty", "item discrimination"
-        ],
-        "max_results": 150
-    },
-    # We omit PsyArXiv / ArXiv / SocArXiv RSS since none reliably found; you can add fallback scrapers similarly.
+    # "arXiv": {
+    #     "type": "arxiv",
+    #     "keywords": [
+    #         "item response", "IRT", "differential item functioning",
+    #         "measurement invariance", "test equating", "psychometric",
+    #         "latent trait", "rasch model", "graded response model",
+    #         "1PL", "2PL", "3PL", "4PL", "parameter logistic model",
+    #         "educational assessment","psychological assessment",
+    #         "multidimensional IRT", "test linking", "test calibration",
+    #         "educational measurement", "assessment validity", "fairness in testing",
+    #         "item generation", "classical test theory",
+    #         "item parameter", "item difficulty", "item discrimination"
+    #     ],
+    #     "max_results": 150
+    # },
+    # # We omit PsyArXiv / ArXiv / SocArXiv RSS since none reliably found; you can add fallback scrapers similarly.
 }
 
 SEEN_PATH = "seen_articles.json"
