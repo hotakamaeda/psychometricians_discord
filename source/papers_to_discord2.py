@@ -429,7 +429,8 @@ def discord_post(content: str):
 
 def format_grouped_items(items):
     today = datetime.now().strftime("%Y-%m-%d")
-    lines = [f"**:loudspeaker: <@&1421877669494128771> — {today}**"]
+    lines = [f"**:loudspeaker: Daily Research 2 — {today}**"]
+    # lines = [f"**:loudspeaker: <@&1421877669494128771> — {today}**"]
     # sort by source so groupby works
     items_sorted = sorted(items, key=lambda x: x["source"])
     for source, group in groupby(items_sorted, key=lambda x: x["source"]):
