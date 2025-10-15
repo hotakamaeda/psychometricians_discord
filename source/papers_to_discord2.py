@@ -142,7 +142,7 @@ PREPRINT_SOURCES = {
     # # We omit PsyArXiv / ArXiv / SocArXiv RSS since none reliably found; you can add fallback scrapers similarly.
 }
 
-SEEN_PATH = "seen_articles.json"
+SEEN_PATH = "seen_articles2.json"
 MAX_AGE_DAYS = 7
 DISCORD_MAX_CONTENT = 2000
 
