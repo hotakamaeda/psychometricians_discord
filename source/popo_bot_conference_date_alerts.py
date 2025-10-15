@@ -71,6 +71,12 @@ If none are upcoming within a month, say 'NA'
 
 @bot.event
 async def on_ready():
+    # Monday-only guard
+    if datetime.today().weekday() != 0:  # Monday=0
+        print("[i] Not Monday → skipping alert.")
+        await bot.close()
+        return
+
     print(f"✅ Logged in as {bot.user}")
     conf_channel = bot.get_channel(CONFERENCE_CHANNEL_ID)
     gen_channel = bot.get_channel(GENERAL_CHANNEL_ID)
