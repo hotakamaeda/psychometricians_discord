@@ -500,7 +500,7 @@ def main():
     all_items = journal_items + pre_items
     today = datetime.now().strftime("%Y-%m-%d")
     if not all_items:
-        discord_post(f"**:loudspeaker: No New Research Found — {today}**\n")
+        print(f"**:loudspeaker: No New Research Found — {today}**\n")
     else:
         # discord_post(f"**:loudspeaker: New Research — {today}**\n")
         lines = format_grouped_items(all_items)
