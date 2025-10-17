@@ -93,7 +93,8 @@ async def on_ready():
     # print(summary)
 
     # Step 3: send to general channel
-    await gen_channel.send("### :calendar_spiral: Upcoming Conferences and Deadlines in the next 1 month\n" + summary)
+    if summary.strip().upper() != "NA":
+        await gen_channel.send("### :calendar_spiral: Upcoming Conferences and Deadlines in the next 1 month\n" + summary)
 
     await bot.close()
 
