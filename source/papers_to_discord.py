@@ -207,7 +207,11 @@ def extract_authors(text: str) -> str:
 
 def fetch_journal_rss(name: str, url: str):
     items = []
-    feed = feedparser.parse(url)
+    # Use requests first, to handle redirects & headers
+    headers = {"User-Agent": "Mozilla/5.0"}
+    resp = requests.get(url, headers=headers, timeout=15)
+    resp.raise_for_status()
+    feed = feedparser.parse(resp.text)
     for e in feed.entries:
         # break
         title = e.get("title", "").strip()
@@ -247,7 +251,11 @@ def fetch_journal_rss(name: str, url: str):
 def scrape_journal_latest(name: str, toc_url: str):
     items = []
     try:
-        resp = requests.get(toc_url, timeout=15)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                          "(KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+        }
+        resp = requests.get(toc_url, headers=headers, timeout=15)
         resp.raise_for_status()
     except Exception as ex:
         print(f"[WARN] Scrape failed for {name}, url {toc_url}: {ex}")
