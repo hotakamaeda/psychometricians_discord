@@ -40,16 +40,15 @@ if not OPENAI_API_KEY:
 SEARCH_TERMS = [
     '"educational assessment" policy OR reform',
     '"standardized testing" legislation OR politics',
-    '"psychometrician licensure" OR "board exam"',
-    '"psychometric career" OR "psychometricians job market"',
+    '"psychometrics"',
+    '"psychometrician"',
+    '"psychological assessment"',
+    '"psychometrics career" OR "psychometricians job market"',
     '"testing agency" OR "assessment company"',
-    '"NCME conference" OR "IMPS conference" psychometrics',
     '"NAEP results" OR "PISA results"',
     'Department of education',
-    'Assessment company',
     '"acquisition" OR "merge" assessment company',
     'No Child Left Behind',
-    "psychometrics news",
 ]
 
 GOOGLE_NEWS_RSS_TMPL = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
@@ -229,7 +228,7 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
     client = OpenAI(api_key=OPENAI_API_KEY)
     system = (
         "You are a senior editor focusing on psychometrics and educational assessment news. "
-        "Prioritize: policy, legislation, politics, testing reforms, professional society updates, licensure/career news, "
+        "Prioritize: policy, legislation, politics, testing reforms, professional society updates, career news, "
         "and media coverage. De-emphasize technical validation studies unless directly relevant. "
         "Summarize the important news and trends in a paragraph for each time window. "
         "Specify the country being discussed. Focus on United States but include some international news. "
@@ -249,11 +248,6 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
         " * Source Title\n"
         " * Source Title\n"
     )
-    # "    * [Source Title](https://link)\n"
-    # "    * [Source Title](https://link)\n"
-    # "    * [Source Title](https://link)\n"
-    # "  At the very end, add a short TrendLines section comparing the three windows in bullet points. Header should be:"
-    # "  ## :chart_with_upwards_trend: **Trendlines**\n"
 
     user_input = {
         "task": "Summarize psychometrics/assessment-related news.",
@@ -456,7 +450,7 @@ def main():
     # report = wrap_links_with_angle_brackets(report)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(all_items)} Articles"
+    header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7) + len(last_60) + len(last_365)} Articles"
     report_txt = header + report
 
     if DISCORD_WEBHOOK_URL:
@@ -470,76 +464,3 @@ if __name__ == "__main__":
 
 
 
-
-
-
-# def clean_link(link: str, max_len: int = 500) -> str:
-#     """
-#     Clean Google News RSS redirect links into real article URLs.
-#     Truncate overly long links to avoid Discord errors.
-#     """
-#     if not link:
-#         return link
-#
-#     # Handle Google News redirect links
-#     if "news.google.com/rss/articles" in link:
-#         # Try to extract final URL from "url=" param if present
-#         if "url=" in link:
-#             parsed = urllib.parse.urlparse(link)
-#             qs = urllib.parse.parse_qs(parsed.query)
-#             if "url" in qs:
-#                 link = qs["url"][0]
-#
-#     # Truncate absurdly long links
-#     if len(link) > max_len:
-#         link = link[:max_len - 3] + "..."
-#
-#     return link
-#
-#
-# def fetch_rss_for_query(query: str) -> List[Dict[str, Any]]:
-#     url = GOOGLE_NEWS_RSS_TMPL.format(query=requests.utils.quote(query))
-#     feed = feedparser.parse(url)
-#     items = []
-#     for e in feed.entries[:MAX_PER_QUERY]:
-#         raw_link = getattr(e, "link", "")
-#         link = clean_link(raw_link)
-#         title = getattr(e, "title", "").strip()
-#         summary = getattr(e, "summary", "")
-#         published = None
-#         if hasattr(e, "published"):
-#             try:
-#                 published = dtparser.parse(e.published)
-#             except Exception:
-#                 published = None
-#         elif hasattr(e, "updated"):
-#             try:
-#                 published = dtparser.parse(e.updated)
-#             except Exception:
-#                 published = None
-#
-#         items.append({
-#             "title": title,
-#             "link": link,
-#             "summary": summary,
-#             "published": published.isoformat() if published else None,
-#             "query": query,
-#         })
-#     return items
-
-
-    # resp = client.responses.create(
-    #     model=model,
-    #     input=[
-    #         {"role": "system", "content": system},
-    #         {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
-    #     ],
-    #    # temperature=0.3,
-    # )
-    #
-    # parts = []
-    # for o in resp.output:
-    #     for c in getattr(o, "content", []):
-    #         if c.type == "output_text":
-    #             parts.append(c.text)
-    # return "\n".join(parts).strip()
