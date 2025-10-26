@@ -418,7 +418,10 @@ def format_item_line(item: Dict[str, str]) -> str:
     title = clean_whitespace(item["title"])
     link = clean_whitespace(item["link"])
     authors = clean_authors(item["authors"])
-    return f"[{title}](<{link}>)\n* {authors}"
+    if authors == '':
+        return f"[{title}](<{link}>)"
+    else:
+        return f"[{title}](<{link}>)\n* {authors}"
 
 def chunk_messages(lines: List[str]) -> List[str]:
     chunks = []
