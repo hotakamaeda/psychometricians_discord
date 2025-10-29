@@ -43,10 +43,13 @@ SEARCH_TERMS = [
     '"psychometrics"',
     '"psychometrician"',
     '"psychological assessment"',
+    '"educational measurement"',
     '"psychometrics career" OR "psychometricians job market"',
     '"testing agency" OR "assessment company"',
-    '"NAEP results" OR "PISA results"',
+    '"standardized assessment"',
     'Department of education',
+    "NAEP assessment",
+    "PISA assessment",
     '"acquisition" OR "merge" assessment company',
     'No Child Left Behind',
 ]
@@ -227,23 +230,23 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
     from openai import OpenAI
     client = OpenAI(api_key=OPENAI_API_KEY)
     system = (
-        "You are a senior editor focusing on psychometrics and educational assessment news. "
+        "You are a senior editor focusing on psychometrics, educational measurement, and psychological assessment news. "
         "Prioritize: policy, legislation, politics, testing reforms, professional society updates, career news, "
-        "and media coverage. De-emphasize technical validation studies unless directly relevant. "
+        "and media coverage. De-emphasize technical studies unless directly relevant. "
         "Summarize the important news and trends in a paragraph for each time window. "
         "Specify the country being discussed. Focus on United States but include some international news. "
-        "Many articles will be recent articles, so pay attention to the published dates and make sure your summary covers the entire timeframe."
+        # "Many articles will be recent articles, so pay attention to the published dates and make sure your summary covers the entire timeframe."
         "\n\n"
         "Output format rules:\n"
-        "- Use plain text with clear section headings:\n"
+        "- Use plain text and copy the following heading:\n"
         "  ## :newspaper2: Past 7 Days\n"
-        "  ## :newspaper2: Past 2 Months\n"
-        "  ## :newspaper2: Past 1 Year\n"
-        "- Under each heading:\n"
-        "  One summary paragraph.\n"
-        "  Under every heading, list of 5 important sources in this format. Keep the source title unchanged.\n"
+        "- Under the heading, write one summary paragraph.\n"
+        "- Under the summary paragraph, list of 8 important sources in this format. Keep the source title unchanged.\n"
         " * Source Title\n"
         " * Source Title\n"
+        " * Source Title\n"
+        " * Source Title\n"
+        " * Source Title\n"        
         " * Source Title\n"
         " * Source Title\n"
         " * Source Title\n"
@@ -412,13 +415,13 @@ def main():
     # print("[i] wrote harvest_debug.json")
 
     last_7 = filter_by_window(all_items, 7)
-    last_60 = filter_by_window(all_items, 60, exclude_days=7)
-    last_365 = filter_by_window(all_items, 365, exclude_days=60)
+    # last_60 = filter_by_window(all_items, 60, exclude_days=7)
+    # last_365 = filter_by_window(all_items, 365, exclude_days=60)
 
     windows_payload = {
         "last_7_days": make_prompt_payload("last_7_days", last_7, False),
-        "last_60_days_excluding_past_7_days": make_prompt_payload("last_60_days_excluding_past_7_days", last_60, False),
-        "last_365_days_excluding_past_60_days": make_prompt_payload("last_365_days_excluding_past_60_days", last_365, False),
+        # "last_60_days_excluding_past_7_days": make_prompt_payload("last_60_days_excluding_past_7_days", last_60, False),
+        # "last_365_days_excluding_past_60_days": make_prompt_payload("last_365_days_excluding_past_60_days", last_365, False),
     }
 
     # Debug by dumping json.
@@ -427,10 +430,10 @@ def main():
     print(f"{len(last_7)} articles in last 7 days")
     # with open("harvest_debug60.json", "w", encoding="utf-8") as f:
     #     json.dump(last_60, f, ensure_ascii=False, indent=2)
-    print(f"{len(last_60)} articles in last 60 days")
+    # print(f"{len(last_60)} articles in last 60 days")
     # with open("harvest_debug365.json", "w", encoding="utf-8") as f:
     #     json.dump(last_365, f, ensure_ascii=False, indent=2)
-    print(f"{len(last_365)} articles in last 365 days")
+    # print(f"{len(last_365)} articles in last 365 days")
     with open("harvest_debugwindows_payload.json", "w", encoding="utf-8") as f:
         json.dump(windows_payload, f, ensure_ascii=False, indent=2)
     # print(f"written to harvest_debugwindows_payload.json")
@@ -450,7 +453,8 @@ def main():
     # report = wrap_links_with_angle_brackets(report)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7) + len(last_60) + len(last_365)} Articles"
+    header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7)} Articles"
+    # header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7) + len(last_60) + len(last_365)} Articles"
     report_txt = header + report
 
     if DISCORD_WEBHOOK_URL:
