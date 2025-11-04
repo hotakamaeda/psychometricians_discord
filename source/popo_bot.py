@@ -1,23 +1,46 @@
+import os
 import re
 import discord
-from discord.ext import commands
-import os
+from discord.ext import commands, tasks
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-load_dotenv()  # loads .env in the same directory
+# ---- Load environment variables ----
+load_dotenv()
 TOKEN = os.getenv("popo_token")
-CHANNEL_ID = int(os.getenv("share_your_work_channel"))  # Showcase channel ID
+CHANNEL_ID = int(os.getenv("share_your_work_channel"))
 
+# ---- Discord setup ----
 intents = discord.Intents.default()
-intents.message_content = True  # needed to read messages
+intents.message_content = True
+intents.voice_states = True
+intents.members = True
+intents.presences = True  # required for idle detection
+
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# ---- Voice activity tracking ----
+voice_join_times = {}
+CHECK_INTERVAL = 60  # seconds
+IDLE_LIMIT = timedelta(minutes=30)
+TOTAL_LIMIT = timedelta(minutes=180)
+
+# ============================================================
+#                         BOT READY
+# ============================================================
 
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
+    check_inactive_users.start()
+
+# ============================================================
+#                    MESSAGE MODERATION
+# ============================================================
 
 @bot.event
 async def on_message(message):
+    """Moderate posts in 'share-your-work' channel."""
     if message.author.bot:
         return
 
@@ -35,7 +58,63 @@ async def on_message(message):
                 delete_after=60
             )
 
-    await bot.process_commands(message)  # allow commands too
+    await bot.process_commands(message)  # allow commands to work too
 
-bot.run(TOKEN)
+# ============================================================
+#                  VOICE ACTIVITY TRACKING
+# ============================================================
 
+@bot.event
+async def on_voice_state_update(member, before, after):
+    """Track when users join or leave voice channels."""
+    if before.channel is None and after.channel is not None:
+        voice_join_times[member.id] = datetime.utcnow()
+    elif before.channel is not None and after.channel is None:
+        voice_join_times.pop(member.id, None)
+
+@tasks.loop(seconds=CHECK_INTERVAL)
+async def check_inactive_users():
+    """Periodically disconnect idle or long-staying users."""
+    now = datetime.utcnow()
+    to_remove = []
+
+    for user_id, join_time in list(voice_join_times.items()):
+        member = bot.get_user(user_id)
+        if not member:
+            continue
+
+        # Skip if not in voice anymore
+        if not member.voice or not member.voice.channel:
+            to_remove.append(user_id)
+            continue
+
+        time_in_channel = now - join_time
+
+        # Idle users after 30 minutes
+        if member.status == discord.Status.idle and time_in_channel > IDLE_LIMIT:
+            try:
+                await member.move_to(None)
+                print(f"😴 Disconnected idle user {member.display_name}")
+            except Exception as e:
+                print(f"⚠️ Could not disconnect idle user {member}: {e}")
+            to_remove.append(user_id)
+
+        # All users after 3 hours
+        elif time_in_channel > TOTAL_LIMIT:
+            try:
+                await member.move_to(None)
+                print(f"🕒 Disconnected {member.display_name} after 3 hours")
+            except Exception as e:
+                print(f"⚠️ Could not disconnect long user {member}: {e}")
+            to_remove.append(user_id)
+
+    # Cleanup
+    for uid in to_remove:
+        voice_join_times.pop(uid, None)
+
+# ============================================================
+#                         RUN BOT
+# ============================================================
+
+if __name__ == "__main__":
+    bot.run(TOKEN)
