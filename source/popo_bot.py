@@ -4,11 +4,17 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+import asyncio
 
 # ---- Load environment variables ----
 load_dotenv()
 TOKEN = os.getenv("popo_token")
-CHANNEL_ID = int(os.getenv("share_your_work_channel"))
+SHARE_CHANNEL_ID = int(os.getenv("share_your_work_channel"))
+INTRO_CHANNEL_ID = int(os.getenv("introduce_yourself_channel"))  # new channel ID
+WELCOME_CHANNEL_ID = int(os.getenv("welcome_channel"))
+GENERAL_CHANNEL_ID = int(os.getenv("general_channel"))
+RESEARCH_CHANNEL_ID = int(os.getenv("daily_research_channel"))
+
 
 # ---- Discord setup ----
 intents = discord.Intents.default()
@@ -34,6 +40,32 @@ async def on_ready():
     print(f"✅ Logged in as {bot.user}")
     check_inactive_users.start()
 
+
+# ============================================================
+#                     NEW MEMBER GREETING
+# ============================================================
+
+@bot.event
+async def on_member_join(member):
+    """Prompt new members to introduce themselves and explore the server."""
+    await asyncio.sleep(5)  # short delay to avoid race condition
+
+    intro_channel = bot.get_channel(INTRO_CHANNEL_ID)
+    if not intro_channel:
+        print("⚠️ Introduce-yourself channel not found.")
+        return
+
+    try:
+        await intro_channel.send(
+            f"👋 Welcome {member.mention} to the Psychometricians Community!\n\n"
+            f"Take a moment to **introduce yourself** here! What is your background? Or your interests?\n\n"
+            f"📘 Please read <#{WELCOME_CHANNEL_ID}> for server tips, "
+            f"browse research papers in <#{RESEARCH_CHANNEL_ID}>, "
+            f"and chat casually in <#{GENERAL_CHANNEL_ID}>!"
+        )
+    except Exception as e:
+        print(f"⚠️ Could not send intro message: {e}")
+
 # ============================================================
 #                    MESSAGE MODERATION
 # ============================================================
@@ -44,7 +76,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    if message.channel.id == CHANNEL_ID:
+    if message.channel.id == SHARE_CHANNEL_ID:
         has_attachment = len(message.attachments) > 0
         url_pattern = re.compile(r"(https?://\S+|www\.\S+)", re.IGNORECASE)
         has_link = bool(url_pattern.search(message.content.lower()))
