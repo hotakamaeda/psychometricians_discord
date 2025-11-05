@@ -6,6 +6,7 @@ seen_articles2.json
 
 /source/archive
 /
+/source/temp.py
 .idea
 
 sent_emails.json
