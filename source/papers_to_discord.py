@@ -12,6 +12,7 @@ import requests
 import feedparser
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from deep_translator import GoogleTranslator
 load_dotenv()  # loads .env in the same directory
 
 # ========== CONFIG ==========
@@ -25,10 +26,14 @@ JOURNAL_SOURCES = {
     #     "rss": "https://rss.sciencedirect.com/publication/science/2666920X",
     #     "scrape": "https://www.sciencedirect.com/journal/computers-and-education-artificial-intelligence/vol/9/suppl/C"  # Example “current issue” page
     # },
-    # "Chinese/English Journal of Educational Measurement and Evaluation (CEJEME)": {
-    #     "rss": "https://www.ce-jeme.org/journal/recent.rss",
-    #     "scrape": "https://www.ce-jeme.org/"  # Example “current issue” page
-    # },
+    "International Journal of Testing (IJT)": {
+        "rss": "https://www.tandfonline.com/feed/rss/hijt20",
+        "scrape": "https://www.tandfonline.com/action/showAxaArticles?journalCode=hijt20"
+    },
+    "Chinese/English Journal of Educational Measurement and Evaluation (CEJEME)": {
+        "rss": "https://www.ce-jeme.org/journal/recent.rss",
+        "scrape": "https://www.ce-jeme.org/"  # Example “current issue” page
+    },
     # "Journal of Educational Computing Research (JECR)": {
     #     "rss": "https://journals.sagepub.com/action/showFeed?ui=0&mi=ehikzz&ai=2b4&jc=jec&type=axatoc&feed=rss",
     #     "scrape": "https://journals.sagepub.com/connected/jec"  # Example “current issue” page
@@ -205,6 +210,13 @@ def extract_authors(text: str) -> str:
     return ""
 
 
+def translate_if_chinese(text):
+    if re.search(r'[\u4e00-\u9fff]', text):
+        translated = GoogleTranslator(source='zh-CN', target='en').translate(text)
+        return f"{text} ({translated})"
+    return text
+
+
 def fetch_journal_rss(name: str, url: str):
     items = []
     # Use requests first, to handle redirects & headers
@@ -215,6 +227,7 @@ def fetch_journal_rss(name: str, url: str):
     for e in feed.entries:
         # break
         title = e.get("title", "").strip()
+        title = translate_if_chinese(title)
         # skip unwanted titles
         if any(skip in title for skip in ["Editorial Board"]):
             continue
@@ -265,6 +278,7 @@ def scrape_journal_latest(name: str, toc_url: str):
 
     for a in soup.select("h3 a, h4 a, .article-title a, .title a"):
         title = a.get_text(strip=True)
+        title = translate_if_chinese(title)
         link = a.get("href")
         if link and not link.startswith("http"):
             link = requests.compat.urljoin(resp.url, link)
@@ -334,7 +348,8 @@ def fetch_arxiv_items(cfg: Dict[str, Any]):
         if t and not is_recent(t):
             continue
         title = e.get("title", "").strip()
-        summary = e.get("summary", "")
+        title = translate_if_chinese(title)
+        # summary = e.get("summary", "")
         authors = entry_authors(e)
         link = e.get("link", "")
         rid = entry_id(e)
@@ -363,6 +378,7 @@ def fetch_preprint_sources():
                 if t and not is_recent(t):
                     continue
                 title = e.get("title", "").strip()
+                title = translate_if_chinese(title)
                 authors = entry_authors(e)
                 link = e.get("link", "")
                 rid = entry_id(e)
