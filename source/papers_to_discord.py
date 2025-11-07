@@ -426,7 +426,7 @@ def format_item_line(item: Dict[str, str]) -> str:
     link = clean_whitespace(item["link"])
     authors = clean_authors(item["authors"])
     if authors == '':
-        return f"[{title}](<{link}>)"
+        return f"[{title}](<{link}>)\n"
     else:
         return f"[{title}](<{link}>)\n* {authors}"
 
