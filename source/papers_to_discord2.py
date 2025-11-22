@@ -508,10 +508,11 @@ def main():
                 continue
             # parse time if available
             try:
-                if it["time"]:
-                    dt_obj = datetime.fromisoformat(it["time"])
-                    if not is_recent(dt_obj):
-                        continue
+                if it["source"] != "Psychological Methods":  # their dates can be ignored
+                    if it["time"]:
+                        dt_obj = datetime.fromisoformat(it["time"])
+                        if not is_recent(dt_obj):
+                            continue
             except:
                 pass
             out.append(it)
