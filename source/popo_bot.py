@@ -58,8 +58,8 @@ async def on_member_join(member):
     try:
         await intro_channel.send(
             f"👋 Welcome {member.mention} to the Psychometricians Community!\n\n"
-            f"Take a moment to **introduce yourself** here! What is your background? Or your interests?\n\n"
-            f"📘 Please read <#{WELCOME_CHANNEL_ID}> for server tips, "
+            f"**Introduce yourself** here! What is your background/interests?\n\n"
+            f"📘 Read <#{WELCOME_CHANNEL_ID}> first for server tips, "
             f"browse research papers in <#{RESEARCH_CHANNEL_ID}>, "
             f"and chat casually in <#{GENERAL_CHANNEL_ID}>!"
         )
