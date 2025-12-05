@@ -61,26 +61,30 @@ async def send_daily_event_reminders():
 
     channel = bot.get_channel(GENERAL_CHANNEL_ID)
 
-    msg = "## :date: **Upcoming Events!**\n\n"
+    msg = "## :date: **Upcoming Events!**"
+    await asyncio.sleep(.3)
+    await channel.send(msg)
 
     if todays_events:
         for e in todays_events:
             if hasattr(e, "url"):
                 event_link = e.url
+                await asyncio.sleep(.3)
+                await channel.send(event_link)
             else:
                 continue
-            msg += event_link + "\n"
 
     if tomorrows_events:
         for e in tomorrows_events:
             if hasattr(e, "url"):
                 event_link = e.url
+                await asyncio.sleep(.3)
+                await channel.send(event_link)
             else:
                 continue
-            msg += event_link + "\n"
 
-    print(msg)
-    await channel.send(msg)
+    # print(msg)
+    # await channel.send(msg)
 
 
 @bot.event
