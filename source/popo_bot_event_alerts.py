@@ -17,19 +17,6 @@ intents.members = True  # if you want access to member info
 intents.guilds = True   # always recommended
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-eastern = pytz.timezone("US/Eastern")
-
-def format_event(event):
-    # Convert event start time to Eastern Time
-    start_et = event.start_time.astimezone(eastern)
-    date_time_str = start_et.strftime("%A, %B %d, %Y - %I:%M %p ET")
-
-    # Event URL is available
-    event_link = event.url if hasattr(event, "url") else "(No link available)"
-
-    return f"{'[**' + event.name + '**](<' + event_link + '>)'}\n📅 {date_time_str}"
-
-
 async def send_daily_event_reminders():
     """Your function that pulls Discord scheduled events and sends reminders."""
     # Get the guild
