@@ -7,6 +7,7 @@ import requests
 from ics import Calendar
 from datetime import datetime, timedelta
 import pytz
+import re
 
 # ---- Config ----
 load_dotenv()
@@ -55,6 +56,7 @@ for e in cal.events:
     # --- 3. Build raw description
     # Enforce < 1000 chars and end with "..."
     raw_desc = (e.location or "") + "\n" + (e.description or "")
+    raw_desc = re.sub(r"\n+", "\n", raw_desc)
     if len(raw_desc) > 997:  # 997 + "..." = 1000
         raw_desc = raw_desc[:997] + "..."
 
