@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 load_dotenv()
 TOKEN = os.getenv("popo_token")
 CONFERENCE_CHANNEL_ID = int(os.getenv("conference_dates_channel"))
-GENERAL_CHANNEL_ID = int(os.getenv("general_channel"))
+NEWS_CHANNEL_ID = int(os.getenv("news_channel"))
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = "gpt-5-nano"
 
@@ -79,7 +79,7 @@ async def on_ready():
 
     print(f"✅ Logged in as {bot.user}")
     conf_channel = bot.get_channel(CONFERENCE_CHANNEL_ID)
-    gen_channel = bot.get_channel(GENERAL_CHANNEL_ID)
+    gen_channel = bot.get_channel(NEWS_CHANNEL_ID)
 
     # Step 1: get latest conference dates message
     latest_conf_text = await fetch_latest_conference_messages(conf_channel)

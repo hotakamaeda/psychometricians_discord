@@ -9,7 +9,7 @@ import pytz  # pip install pytz
 # ---- Config ----
 load_dotenv()
 TOKEN = os.getenv("popo_token")
-NEWS_CHANNEL_ID = int(os.getenv("general_channel"))
+NEWS_CHANNEL_ID = int(os.getenv("news_channel"))
 
 intents = discord.Intents.default()
 intents.message_content = True
