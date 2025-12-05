@@ -31,6 +31,15 @@ events = []
 utc = pytz.utc
 now = datetime.now(tz=utc)
 
+
+def shorten_url(url):
+    api = "https://is.gd/create.php"
+    r = requests.get(api, params={"format": "simple", "url": url})
+    if r.status_code == 200:
+        return r.text.strip()
+    return "https://ncme.org/events/webinars/"  # fallback
+
+
 for e in cal.events:
     begin = e.begin.to(utc).datetime
     end = e.end.to(utc).datetime
@@ -43,12 +52,24 @@ for e in cal.events:
     if begin < now:
         begin = now + timedelta(minutes=15)
 
+    # --- 3. Build raw description
+    # Enforce < 1000 chars and end with "..."
+    raw_desc = (e.location or "") + "\n" + (e.description or "")
+    if len(raw_desc) > 997:  # 997 + "..." = 1000
+        raw_desc = raw_desc[:997] + "..."
+
+    # --- 4. Build URL
+    # Needs to be <100 characters
+    URL = getattr(e, "url", None) or (e.location or "")
+    if len(URL) > 99:
+        URL = shorten_url(URL)
+
     events.append({
         "name": e.name,
         "begin": begin,
         "end": end,
-        "description": (e.location or "") + "\n" + (e.description or ""),
-        "url": getattr(e, "url", None) or (e.location or "")
+        "description": raw_desc,
+        "url": URL
     })
 
 
