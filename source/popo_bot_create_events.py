@@ -66,8 +66,11 @@ for e in cal.events:
     if len(URL) > 99:
         URL = shorten_url(URL)
 
+    # --- 5. Build Name
+    clean_name = ''.join(ch for ch in e.name if ch.isprintable()).strip()
+
     events.append({
-        "name": e.name,
+        "name": clean_name,
         "begin": begin,
         "end": end,
         "description": raw_desc,
