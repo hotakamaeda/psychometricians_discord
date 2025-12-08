@@ -124,7 +124,10 @@ JOURNAL_SOURCES = {
     # }
 }
 
-REQUIRED_KEYWORDS = ["item response", "assessment", "psychometric", "measurement", "standardized test"]
+REQUIRED_KEYWORDS = ["item response theory", "psychometric","psychometrics", "psychometrician", "test equating", "item response model",
+                     "classical test theory", "psychological measurement", "educational measurement",
+                     "psychological assessment", "educational assessment", "item parameter", "differential item functioning",
+                     "cognitive diagnosis model", "rasch model", "item difficulty", "item discrimination"]
 ALLOWED_ARXIV_PREFIXES = ("math.", "stat.", "cs.")
 
 # Preprint (only via APIs / fetchers, as before)
@@ -136,7 +139,7 @@ PREPRINT_SOURCES = {
             "measurement invariance", "test equating", "psychometric",
             "latent trait", "rasch model", "graded response model",
             "1PL", "2PL", "3PL", "4PL", "parameter logistic model",
-            "educational assessment","psychological assessment",
+            "educational assessment", "psychological assessment",
             "multidimensional IRT", "test linking", "test calibration",
             "educational measurement", "assessment validity", "fairness in testing",
             "item generation", "classical test theory",
