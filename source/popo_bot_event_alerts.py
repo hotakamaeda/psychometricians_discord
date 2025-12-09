@@ -32,7 +32,7 @@ async def send_daily_event_reminders():
     eastern = pytz.timezone("US/Eastern")
     today_et = datetime.now(eastern).date()
     this_week_et = (datetime.now(eastern) + timedelta(days=7)).date()
-    today_is_monday = datetime.today().weekday() != 0
+    today_is_monday = datetime.today().weekday() == 0
 
     todays_events = []
     this_week_events = []
@@ -41,7 +41,8 @@ async def send_daily_event_reminders():
         start_et = event.start_time.astimezone(eastern).date()
         if start_et == today_et:
             todays_events.append(event)
-        elif start_et <= this_week_et:
+        # starting after today, this week
+        elif start_et > today_et and start_et <= this_week_et:
             this_week_events.append(event)
 
     # print(today_is_monday)
@@ -56,7 +57,7 @@ async def send_daily_event_reminders():
 
     if todays_events:
         await asyncio.sleep(.3)
-        await channel.send("## :date: **Events Today!**")
+        await channel.send("# :date: **Events Today!**")
         for e in todays_events:
             if hasattr(e, "url"):
                 event_link = e.url
@@ -68,7 +69,7 @@ async def send_daily_event_reminders():
     # Weekly event list sent only on Mondays
     if this_week_events and today_is_monday:
         await asyncio.sleep(.3)
-        await channel.send("## :date: **Events This Week!**")
+        await channel.send("### :date: **Events This Week!**")
         for e in this_week_events:
             if hasattr(e, "url"):
                 event_link = e.url
