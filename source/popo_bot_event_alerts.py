@@ -66,7 +66,7 @@ async def send_daily_event_reminders():
                 continue
 
     # Weekly event list sent only on Mondays
-    if this_week_events & today_is_monday:
+    if this_week_events and today_is_monday:
         await asyncio.sleep(.3)
         await channel.send("## :date: **Events This Week!**")
         for e in this_week_events:
