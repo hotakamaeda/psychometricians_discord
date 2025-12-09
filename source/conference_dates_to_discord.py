@@ -23,14 +23,6 @@ os.makedirs(SNAPSHOT_DIR, exist_ok=True)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 DISCORD_WEBHOOK_CONFERENCE_UPDATES = os.getenv("DISCORD_WEBHOOK_CONFERENCE_UPDATES")
 
-# # Regex for date-like strings
-# current_year = datetime.today().year
-# next_year = datetime.today().year + 1
-# DATE_REGEX = re.compile(
-#     f"([^\d]{current_year}[^\d]|[^\d]{next_year}[^\d])",
-#     # r"((January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(-\d{1,2})?,?\s*\d{4})|(20\d\d)",
-#     re.IGNORECASE
-# )
 
 def parse_date_safe(date_str):
     """Try to parse a date string safely, return datetime or None."""
@@ -60,44 +52,6 @@ def clean_past_dates(conference):
 
     return updated
 
-
-# Your DATE_REGEX assumed defined elsewhere
-
-# def find_dates_with_context(
-#     text: str,
-#     # search_names: List[str],
-#     window: int = 30):
-#     """
-#     1) Find date-like substrings in `text`.
-#     2) Grab `window` chars of surrounding context for each date.
-#     Returns: entire string if dates are found.
-#     """
-#     # Collect raw matches first
-#     # matches = []
-#     ranges_year = []
-#     for m in DATE_REGEX.finditer(text):
-#         # date_str = m.group(0)
-#         start = max(m.start() - window, 0)
-#         end = min(m.end() + window, len(text))
-#         # context = text[start:end]
-#         # matches.append((date_str, context))
-#         ranges_year.extend(list(range(start, end)))
-#
-#     # Filter again. Need month and day
-#     pattern = re.compile(
-#         "".join([r"(([^\d]{1,10})((^|\s)Jan|(^|\s)Feb|(^|\s)Mar|(^|\s)Apr|(^|\s)May|(^|\s)Jun|(^|\s)Jul|(^|\s)Aug|(^|\s)Sept|(^|\s)Oct|(^|\s)Nov|(^|\s)Dec))|",
-#         r"(((^|\s)Jan|(^|\s)Feb|(^|\s)Mar|(^|\s)Apr|(^|\s)May|(^|\s)Jun|(^|\s)Jul|(^|\s)Aug|(^|\s)Sept|(^|\s)Oct|(^|\s)Nov|(^|\s)Dec))([^\d]{1,10}\d{1,2})|",
-#         r"|(\d{1,2}[^a-zA-Z0-9]{1,2}\d{1,2})"]),
-#         re.IGNORECASE)
-#     ranges_day = []
-#     for m in pattern.finditer(text):
-#         start = max(m.start() - window, 0)
-#         end = min(m.end() + window, len(text))
-#         ranges_day.extend(list(range(start, end)))
-#
-#     intersection = list(set(ranges_year) & set(ranges_day))
-#     extracted_characters = "".join([text[i] for i in intersection])
-#     return extracted_characters
 
 def call_gpt(current_info, system_prompt, prompt):
     """Ask GPT to validate if candidate dates are relevant and update JSON."""
@@ -252,40 +206,6 @@ def scrape_and_update(conference):
     updated_conference = {**conference, **updated_conference_small}
     return updated_conference
 
-    # # Only call GPT if new candidates differ from stored info
-    # # if updated["date"] not in str(candidates) or updated["submission_deadline"] not in str(candidates):
-    # updated_dates = call_gpt(conference["name"], updated[['date','submission_deadline']], candidates)
-
-    # return updated
-
-
-# def format_date_range(start_date, end_date):
-#     """Format YYYY-MM-DD → Month D, YYYY style. Handle 'unknown' gracefully."""
-#     if start_date == "unknown" and end_date == "unknown":
-#         return "Date unknown"
-#
-#     def fmt(date_str):
-#         if date_str == "unknown":
-#             return None
-#         try:
-#             dt = datetime.strptime(date_str, "%Y-%m-%d")
-#             return dt.strftime("%B %-d, %Y")  # e.g., April 8, 2026
-#         except Exception:
-#             return date_str
-#
-#     start = fmt(start_date)
-#     end = fmt(end_date)
-#
-#     if start and end:
-#         # If same month and year, compress to e.g. "April 8–11, 2026"
-#         dt1 = datetime.strptime(start_date, "%Y-%m-%d")
-#         dt2 = datetime.strptime(end_date, "%Y-%m-%d")
-#         if dt1.year == dt2.year and dt1.month == dt2.month:
-#             return f"{dt1.strftime('%B')} {dt1.day}–{dt2.day}, {dt1.year}"
-#         if dt1.year == dt2.year:
-#             return f"{dt1.strftime('%B %d')} to {dt2.strftime('%B %d')}, {dt1.year}"
-#         return f"{dt1.strftime('%B %d, %Y')} to {dt2.strftime('%B %d, %Y')}"
-#     return start or end
 
 def format_date_range(start_date: str, end_date: str) -> str:
     """
@@ -397,85 +317,6 @@ def convert_to_discord_markdown(conference_data):
         output_lines.append("")  # blank line between categories
 
     return "\n".join(output_lines)
-
-# def extract_conference_name(line):
-#     """
-#     Extracts the conference name from a markdown line like:
-#     [**NCME Annual Meeting (National Council on Measurement in Education)**](https://...)
-#     """
-#     match = re.search(r"\[\*\*(.*?)\*\*\]", line)
-#     if match:
-#         return match.group(1)
-#     return None
-#
-
-# def parse_conferences(file_path):
-#     conferences = []
-#     current_conf = []
-#     with open(file_path, encoding="utf-8") as f:
-#         for line in f:
-#             # Conference headings in your format start with "## " or "[**"
-#             if line.startswith("[**"):
-#                 # Save the previous block
-#                 if current_conf:
-#                     conferences.append(current_conf)
-#                     current_conf = []
-#             current_conf.append(line.rstrip("\n"))
-#         if current_conf:
-#             conferences.append(current_conf)
-#     return conferences
-#
-#
-# def compare_conferences(old_conf, new_conf):
-#     diff = difflib.unified_diff(old_conf, new_conf, lineterm="")
-#     return list(diff)
-#
-#
-# def compare_files(old_file, new_file):
-#     old_confs = parse_conferences(old_file)
-#     new_confs = parse_conferences(new_file)
-#
-#     changes = {}
-#
-#     for i, (old_conf, new_conf) in enumerate(zip(old_confs, new_confs)):
-#         conf_name = new_conf[0]  # first line is conference heading
-#         diff = compare_conferences(old_conf, new_conf)
-#         if diff:
-#             changes[conf_name] = diff
-#
-#     return changes
-#
-#
-# def notify_conference_updates():
-#     # Find all markdown files
-#     files = glob.glob("conference_discord/*.md")
-#     if len(files) < 2:
-#         print("Not enough files to compare.")
-#         return
-#
-#     # Sort chronologically (YYYY_MM_DD.md naming guarantees this)
-#     files.sort()
-#     prev_file, latest_file = files[-2], files[-1]
-#     diff = compare_files(prev_file, latest_file)
-#
-#
-#     changes = [line for line in diff if line.startswith(("+", "-")) and not line.startswith(("+++", "---"))]
-#
-#     # Build Discord message
-#     message = f"📢 **Conference Updates Detected** ({datetime.today().strftime('%Y-%m-%d')})\n"
-#     for conf, lines in grouped.items():
-#         message += f"\n**{conf}**\n```diff\n"
-#         for l in lines:
-#             message += l + "\n"
-#         message += "```\n"
-#
-#     # Send to Discord webhook
-#     try:
-#         resp = requests.post(DISCORD_WEBHOOK_CONFERENCE_UPDATES, json={"content": message})
-#         resp.raise_for_status()
-#         print("✅ Sent grouped conference updates to Discord.")
-#     except Exception as e:
-#         print("❌ Failed to send Discord update:", e)
 
 
 # ---- Parse file into list of conferences ----
