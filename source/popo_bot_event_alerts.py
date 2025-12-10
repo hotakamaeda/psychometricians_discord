@@ -81,7 +81,7 @@ async def send_daily_event_reminders():
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    print(f"Logged in as {bot.user} on {datetime.now(pytz.timezone('US/Eastern')).date()}")
 
     # Wait briefly to ensure guild list is populated
     await asyncio.sleep(2)
@@ -90,6 +90,7 @@ async def on_ready():
 
     # After sending, safely close the bot so the script exits
     await bot.close()
+    print(f"Closing bot on {datetime.now(pytz.timezone('US/Eastern')).date()}")
 
 
 bot.run(TOKEN)
