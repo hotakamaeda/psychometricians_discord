@@ -32,7 +32,7 @@ async def send_daily_event_reminders():
     eastern = pytz.timezone("US/Eastern")
     today_et = datetime.now(eastern).date()
     this_week_et = (datetime.now(eastern) + timedelta(days=7)).date()
-    today_is_monday = datetime.today().weekday() == 0
+    today_is_monday = today_et.weekday() == 0
 
     todays_events = []
     this_week_events = []
