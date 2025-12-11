@@ -51,11 +51,13 @@ async def send_daily_event_reminders():
     # raise
 
     if not todays_events and not today_is_monday:
+        print("No Events Today. Today is not Monday")
         return  # send nothing
 
     channel = bot.get_channel(NEWS_CHANNEL_ID)
 
     if todays_events:
+        print("Events Today")
         await asyncio.sleep(.3)
         await channel.send("# :date: **Events Today!**")
         for e in todays_events:
@@ -68,6 +70,7 @@ async def send_daily_event_reminders():
 
     # Weekly event list sent only on Mondays
     if this_week_events and today_is_monday:
+        print("Events next week and today is monday")
         await asyncio.sleep(.3)
         await channel.send("### :date: **Events This Week!**")
         for e in this_week_events:
