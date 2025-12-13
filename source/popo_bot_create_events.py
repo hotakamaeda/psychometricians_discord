@@ -23,7 +23,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # Currently creates only NCME events
 
 # ---- Download NCME ICS ----
-url = "https://ncme.org/ncme-events/list/?shortcode=6e6d5282&ical=1"
+# url = "https://ncme.org/ncme-events/list/?shortcode=6e6d5282&ical=1"
+url = "https://ncme.org/ncme-events/list/?ical=1"
 ics_data = requests.get(url).text
 cal = Calendar(ics_data)
 
