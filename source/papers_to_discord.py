@@ -26,6 +26,10 @@ JOURNAL_SOURCES = {
     #     "rss": "https://rss.sciencedirect.com/publication/science/2666920X",
     #     "scrape": "https://www.sciencedirect.com/journal/computers-and-education-artificial-intelligence/vol/9/suppl/C"  # Example “current issue” page
     # },
+    "British Journal of Mathematical and Statistical Psychology (BJMSP)": {
+        "rss": "https://bpspsychub.onlinelibrary.wiley.com/feed/20448317/most-recent",
+        "scrape": "https://bpspsychub.onlinelibrary.wiley.com/action/doSearch?SeriesKey=20448317&sortBy=Earliest"
+    },
     "International Journal of Testing (IJT)": {
         "rss": "https://www.tandfonline.com/feed/rss/hijt20",
         "scrape": "https://www.tandfonline.com/action/showAxaArticles?journalCode=hijt20"
@@ -177,7 +181,7 @@ def is_recent(dt_obj):
 
 def entry_authors(entry):
     if hasattr(entry, "authors"):
-        names = [a.get("name", "") if isinstance(a, dict) else getattr(a, "name", "") for a in entry.authors]
+        names = [a.get("name", "").replace('\n', '') if isinstance(a, dict) else getattr(a, "name", "").replace('\n', '') for a in entry.authors]
         return ", ".join(n for n in names if n)
     return entry.get("author", "")
 
