@@ -69,6 +69,7 @@ for e in cal.events:
 
     # --- 5. Build Name
     clean_name = ''.join(ch for ch in e.name if ch.isprintable()).strip()
+    clean_name = clean_name[:100].strip()
 
     events.append({
         "name": clean_name,
@@ -98,11 +99,13 @@ async def schedule_events(events):
 
     for ev in events:
         print(ev["name"])
-        if ev["name"][:100] not in existing_names:
+        if ev["name"] not in existing_names:
             # Create new event
+            print("creating")
+            print(ev["name"])
             try:
                 created = await guild.create_scheduled_event(
-                    name=ev["name"][:100], # 100 characters max
+                    name=ev["name"],
                     start_time=ev["begin"],
                     end_time=ev["end"],
                     description=ev["description"],
@@ -128,6 +131,7 @@ async def on_ready():
     await asyncio.sleep(2)
     await schedule_events(events)
     await bot.close()
+    print(f"Logged out bot")
 
 
 bot.run(TOKEN)
