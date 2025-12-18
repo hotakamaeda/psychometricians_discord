@@ -98,11 +98,11 @@ async def schedule_events(events):
 
     for ev in events:
         print(ev["name"])
-        if ev["name"] not in existing_names:
+        if ev["name"][:100] not in existing_names:
             # Create new event
             try:
                 created = await guild.create_scheduled_event(
-                    name=ev["name"],
+                    name=ev["name"][:100], # 100 characters max
                     start_time=ev["begin"],
                     end_time=ev["end"],
                     description=ev["description"],
