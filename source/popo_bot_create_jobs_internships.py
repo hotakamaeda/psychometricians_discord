@@ -87,22 +87,16 @@ async def on_ready():
 
         for e in entries:
             guid = e.get("id") or e.get("guid") or e.get("link")
-            # if not guid or guid in posted:
-            #     continue
+            if not guid or guid in posted:
+                continue
 
             title = clean_text(e.get("title", "Untitled Position"), 100)
             link = e.get("link", "")
             summary = clean_text(e.get("content", "")[0].get("value", ""), 1900)
-            # raise
-            # summary = clean_text(e.get("summary", ""), 1900)
-
             content = (
                 f"{summary}\n"
                 f"🔗 **See Posting:** {link}"
             )
-
-            # print(content)
-            # raise
 
             try:
                 await forum.create_thread(
@@ -116,7 +110,6 @@ async def on_ready():
 
             except Exception as ex:
                 print(f"Error posting {title}: {ex}")
-            break
 
     save_posted(new_posted)
     await bot.close()
