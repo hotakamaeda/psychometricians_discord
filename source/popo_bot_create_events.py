@@ -87,22 +87,30 @@ async def schedule_events(events):
         print("No guild found. Bot may not be in the server yet.")
         return
 
-    # Pull scheduled events already in Discord
-    preexisting_events = await guild.fetch_scheduled_events()
-    existing_names = {ev.name for ev in preexisting_events}
-
+    # # Pull scheduled events already in Discord
+    # preexisting_events = await guild.fetch_scheduled_events()
+    # existing_names = {ev.name for ev in preexisting_events}
+    # Fetch existing Discord scheduled events
+    existing_events = await guild.fetch_scheduled_events()
+    # Map name -> ScheduledEvent
+    existing_by_name = {e.name: e for e in existing_events}
     channel = bot.get_channel(NEWS_CHANNEL_ID)
 
     print(f"Found {len(events)} ICS events")
-    print(f"Found {len(preexisting_events)} preexisting Discord events")
+    print(f"Found {len(existing_events)} preexisting Discord events")
     # print(existing_names)
 
     for ev in events:
-        print(ev["name"])
-        if ev["name"] not in existing_names:
-            # Create new event
-            print("creating")
-            print(ev["name"])
+        # print(ev["name"])
+
+        existing = existing_by_name.get(ev["name"])
+        # print(existing)
+        # -------------------------
+        # CREATE NEW EVENT
+        # -------------------------
+        if existing is None:
+            print(f"creating: {ev['name']}")
+
             try:
                 created = await guild.create_scheduled_event(
                     name=ev["name"],
@@ -115,13 +123,82 @@ async def schedule_events(events):
                 )
                 msg = (
                     f"## :date: **New NCME Event!**\n"
-                    f"{created.url}"  # ← This is the clickable Discord event link
+                    f"{created.url}"
                 )
                 await channel.send(msg)
                 await asyncio.sleep(0.3)
+                print("created")
 
             except Exception as e:
                 print(f"Error creating event: {e}")
+
+        # -------------------------
+        # UPDATE EXISTING EVENT
+        # -------------------------
+        else:
+            needs_update = False
+            updates = {}
+
+            if existing.start_time != ev["begin"]:
+                updates["start_time"] = ev["begin"]
+                needs_update = True
+                print('update start_time')
+                print(updates["start_time"])
+
+            if existing.end_time != ev["end"]:
+                updates["end_time"] = ev["end"]
+                needs_update = True
+                print('update end_time')
+                print(updates["end_time"])
+
+            if (existing.description or "") != (ev["description"] or ""):
+                updates["description"] = ev["description"]
+                needs_update = True
+                print('update description')
+                print(updates["description"])
+
+            if needs_update:
+                print(f"updating: {ev['name']}")
+
+                try:
+                    await existing.edit(**updates)
+                    # msg = (
+                    #     f"## :pencil2: **Event Updated**\n"
+                    #     f"{existing.url}"
+                    # )
+                    # await channel.send(msg)
+                    await asyncio.sleep(0.3)
+                    print("updated")
+
+                except Exception as e:
+                    print(f"Error updating event {ev['name']}: {e}")
+
+
+    # for ev in events:
+    #     print(ev["name"])
+    #     if ev["name"] not in existing_names:
+    #         # Create new event
+    #         print("creating")
+    #         print(ev["name"])
+    #         try:
+    #             created = await guild.create_scheduled_event(
+    #                 name=ev["name"],
+    #                 start_time=ev["begin"],
+    #                 end_time=ev["end"],
+    #                 description=ev["description"],
+    #                 privacy_level=discord.PrivacyLevel.guild_only,
+    #                 entity_type=discord.EntityType.external,
+    #                 location=ev["url"]
+    #             )
+    #             msg = (
+    #                 f"## :date: **New NCME Event!**\n"
+    #                 f"{created.url}"  # ← This is the clickable Discord event link
+    #             )
+    #             await channel.send(msg)
+    #             await asyncio.sleep(0.3)
+    #
+    #         except Exception as e:
+    #             print(f"Error creating event: {e}")
 
 
 # ---- Bot Ready ----
