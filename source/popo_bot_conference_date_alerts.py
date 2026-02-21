@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import aiohttp  # pip install aiohttp
+import requests
 
 # ---- Config ----
 load_dotenv()
@@ -24,22 +24,21 @@ def conference_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
 
     client = OpenAI(api_key=OPENAI_API_KEY)
 
-
-    async def webhook_send(content: str):
+    def webhook_send(content: str):
         """Send a plain message to Discord via webhook."""
         if not DISCORD_WEBHOOK_ANNOUNCEMENTS:
             print("Missing DISCORD_WEBHOOK in environment.")
             return
 
-        async with aiohttp.ClientSession() as session:
-            resp = await session.post(
-                DISCORD_WEBHOOK_ANNOUNCEMENTS,
-                json={"content": content},
-            )
-            # Discord webhook success is usually 204 No Content
-            if resp.status not in (200, 204):
-                text = await resp.text()
-                print(f"Webhook failed: {resp.status} {text}")
+        response = requests.post(
+            DISCORD_WEBHOOK_ANNOUNCEMENTS,
+            json={"content": content},
+            timeout=10,  # optional but recommended
+        )
+
+        # Discord webhook success is usually 204 No Content (sometimes 200)
+        if response.status_code not in (200, 204):
+            print(f"Webhook failed: {response.status_code} {response.text}")
 
 
     async def fetch_latest_conference_messages(channel):
@@ -113,8 +112,7 @@ def conference_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
 
         # Step 3: send to general channel
         if summary.strip().upper() != "NA":
-            # await gen_channel.send("### :calendar_spiral: Upcoming Conferences and Deadlines in the next 1 month\n" + summary)
-            await webhook_send("### :calendar_spiral: Upcoming Conferences and Deadlines in the next 1 month\n" + summary)
+            webhook_send("### :calendar_spiral: Upcoming Conferences and Deadlines in the next 1 month\n" + summary)
 
         await bot.close()
 

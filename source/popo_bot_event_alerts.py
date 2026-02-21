@@ -5,7 +5,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 import pytz  # pip install pytz
-import aiohttp  # pip install aiohttp
+import requests
+
 
 # ---- Config ----
 load_dotenv()
@@ -19,21 +20,21 @@ def event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
     intents.guilds = True   # always recommended
     bot = commands.Bot(command_prefix="!", intents=intents)
 
-    async def webhook_send(content: str):
+    def webhook_send(content: str):
         """Send a plain message to Discord via webhook."""
         if not DISCORD_WEBHOOK_ANNOUNCEMENTS:
             print("Missing DISCORD_WEBHOOK in environment.")
             return
 
-        async with aiohttp.ClientSession() as session:
-            resp = await session.post(
-                DISCORD_WEBHOOK_ANNOUNCEMENTS,
-                json={"content": content},
-            )
-            # Discord webhook success is usually 204 No Content
-            if resp.status not in (200, 204):
-                text = await resp.text()
-                print(f"Webhook failed: {resp.status} {text}")
+        response = requests.post(
+            DISCORD_WEBHOOK_ANNOUNCEMENTS,
+            json={"content": content},
+            timeout=10  # optional but recommended
+        )
+
+        # Discord webhook success is usually 204 No Content (sometimes 200)
+        if response.status_code not in (200, 204):
+            print(f"Webhook failed: {response.status_code} {response.text}")
 
 
     async def send_daily_event_reminders():
@@ -70,23 +71,23 @@ def event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
         if todays_events:
             print("Events Today")
             await asyncio.sleep(.3)
-            await webhook_send("# :date: **Events Today!**")
+            webhook_send("# :date: **Events Today!**")
             for e in todays_events:
                 if hasattr(e, "url"):
                     event_link = e.url
                     await asyncio.sleep(.3)
-                    await webhook_send(event_link)
+                    webhook_send(event_link)
 
         # Weekly event list sent only on Mondays
         if this_week_events and today_is_monday:
             print("Events next week and today is monday")
             await asyncio.sleep(.3)
-            await webhook_send("### :date: **Events This Week!**")
+            webhook_send("### :date: **Events This Week!**")
             for e in this_week_events:
                 if hasattr(e, "url"):
                     event_link = e.url
                     await asyncio.sleep(.3)
-                    await webhook_send(event_link)
+                    webhook_send(event_link)
 
 
     @bot.event
