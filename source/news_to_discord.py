@@ -25,242 +25,261 @@ import string
 # -----------------------------
 load_dotenv()  # loads .env in the same directory
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_NEWS")
-# OPENAI_MODEL = "gpt-5-nano"
-OPENAI_MODEL = "gpt-5-mini"
+def gpt_news(today_is_monday, DISCORD_WEBHOOK_URL):
 
-if not OPENAI_API_KEY:
-    print("ERROR: Please set OPENAI_API_KEY in your .env", file=sys.stderr)
-    sys.exit(1)
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    # DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_NEWS")
+    # OPENAI_MODEL = "gpt-5-nano"
+    OPENAI_MODEL = "gpt-5-mini"
 
-# -----------------------------
-# Config
-# -----------------------------
-SEARCH_TERMS = [
-    '"educational assessment" policy OR reform',
-    '"standardized testing" legislation OR politics',
-    '"psychometrics"',
-    '"psychometrician"',
-    '"psychological assessment"',
-    '"educational measurement"',
-    '"psychometrics career" OR "psychometricians job market"',
-    '"testing agency" OR "assessment company"',
-    '"standardized assessment"',
-    'Department of education',
-    "NAEP assessment",
-    "PISA assessment",
-    '"acquisition" OR "merge" assessment company',
-    'No Child Left Behind',
-]
+    if not OPENAI_API_KEY:
+        print("ERROR: Please set OPENAI_API_KEY in your .env", file=sys.stderr)
+        sys.exit(1)
 
-GOOGLE_NEWS_RSS_TMPL = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
-MAX_ARTICLES_PER_WINDOW = 2000
-MAX_PER_QUERY = 999
-HTTP_TIMEOUT = 15
+    # -----------------------------
+    # Config
+    # -----------------------------
+    SEARCH_TERMS = [
+        '"educational assessment"',
+        '"standardized testing" legislation OR politics',
+        '"psychometrics"',
+        '"psychometrician"',
+        '"psychological assessment"',
+        '"educational measurement"',
+        # '"psychometrics career" OR "psychometricians job market"',
+        '"testing agency"',
+        '"assessment company"',
+        '"standardized assessment"',
+        # 'Department of education',
+        "NAEP assessment",
+        "PISA assessment",
+        '"acquisition" OR "merge" assessment company',
+        'No Child Left Behind',
+    ]
 
-# -----------------------------
-# Helpers
-# -----------------------------
+    GOOGLE_NEWS_RSS_TMPL = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
+    MAX_ARTICLES_PER_WINDOW = 2000
+    MAX_PER_QUERY = 999
+    HTTP_TIMEOUT = 15
 
-# def resolve_final_url(url: str) -> str: # doesnt work right now.
-#     """
-#     Follow redirects and return the final destination URL.
-#     Useful for Google News RSS or other aggregator links.
-#     """
-#     try:
-#         resp = requests.head(url, allow_redirects=True, timeout=10)
-#         return resp.url
-#     except Exception as e:
-#         print(f"[warn] Could not resolve {url}: {e}")
-#         return url  # fallback to original
+    # -----------------------------
+    # Helpers
+    # -----------------------------
 
-# def clean_summary(summary: str) -> str:
-#     if not summary:
-#         return ""
-#     # Strip HTML
-#     text = BeautifulSoup(summary, "html.parser").get_text(" ", strip=True)
-#     return text
+    # def resolve_final_url(url: str) -> str: # doesnt work right now.
+    #     """
+    #     Follow redirects and return the final destination URL.
+    #     Useful for Google News RSS or other aggregator links.
+    #     """
+    #     try:
+    #         resp = requests.head(url, allow_redirects=True, timeout=10)
+    #         return resp.url
+    #     except Exception as e:
+    #         print(f"[warn] Could not resolve {url}: {e}")
+    #         return url  # fallback to original
 
-def fetch_rss_for_query(query: str):
-    """
-    Fetch RSS items from Google News for a given query.
-    Resolves each link to its final destination.
-    """
-    encoded_query = urllib.parse.quote_plus(query)
-    url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(url)
+    # def clean_summary(summary: str) -> str:
+    #     if not summary:
+    #         return ""
+    #     # Strip HTML
+    #     text = BeautifulSoup(summary, "html.parser").get_text(" ", strip=True)
+    #     return text
 
-    items = []
-    for entry in feed.entries[:MAX_PER_QUERY]:
-        title = getattr(entry, "title", "").strip()
-        link = getattr(entry, "link", "")
-        # link = resolve_final_url(getattr(entry, "link", ""))
-        # Summary is actually the same as title. redundant.
-        # summary_raw = getattr(entry, "summary", "")
-        # summary = clean_summary(summary_raw)
+    def fetch_rss_for_query(query: str):
+        """
+        Fetch RSS items from Google News for a given query.
+        Resolves each link to its final destination.
+        """
+        encoded_query = urllib.parse.quote_plus(query)
+        url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
+        feed = feedparser.parse(url)
 
-        # Try published date
-        published = None
-        for attr in ("published", "updated"):
-            if hasattr(entry, attr):
+        items = []
+        for entry in feed.entries[:MAX_PER_QUERY]:
+            title = getattr(entry, "title", "").strip()
+            link = getattr(entry, "link", "")
+            # link = resolve_final_url(getattr(entry, "link", ""))
+            # Summary is actually the same as title. redundant.
+            # summary_raw = getattr(entry, "summary", "")
+            # summary = clean_summary(summary_raw)
+
+            # Try published date
+            published = None
+            for attr in ("published", "updated"):
+                if hasattr(entry, attr):
+                    try:
+                        dt = dtparser.parse(getattr(entry, attr))
+                        published = dt.date().isoformat()  # YYYY-MM-DD only
+                        break
+                    except Exception:
+                        pass
+
+
+            published = None
+            if hasattr(entry, "published"):
                 try:
-                    dt = dtparser.parse(getattr(entry, attr))
-                    published = dt.date().isoformat()  # YYYY-MM-DD only
-                    break
+                    published = dtparser.parse(entry.published).isoformat()
+                except Exception:
+                    pass
+            elif hasattr(entry, "updated"):
+                try:
+                    published = dtparser.parse(entry.updated).isoformat()
                 except Exception:
                     pass
 
+            items.append({
+                "title": title,
+                "link": link,
+                # "summary": summary,
+                "published": published,
+                "query": query,   # 👈 add back so payload has context
+            })
+        return items
 
-        published = None
-        if hasattr(entry, "published"):
+
+    def harvest_articles(terms: List[str]) -> List[Dict[str, Any]]:
+        all_items = []
+        for q in terms:
             try:
-                published = dtparser.parse(entry.published).isoformat()
-            except Exception:
-                pass
-        elif hasattr(entry, "updated"):
+                items = fetch_rss_for_query(q)
+                all_items.extend(items)
+                time.sleep(0.4)
+            except Exception as e:
+                print(f"[warn] RSS fetch failed for: {q} :: {e}", file=sys.stderr)
+
+        # Deduplicate by link or title
+        seen = set()
+        deduped = []
+        for it in all_items:
+            key = it.get("link") or it.get("title")
+            if key and key not in seen:
+                seen.add(key)
+                deduped.append(it)
+
+        # Sort by published date (newest first)
+        def sort_key(it):
+            pub = it.get("published")
+            if not pub:
+                return datetime.min  # put undated at the end
             try:
-                published = dtparser.parse(entry.updated).isoformat()
+                return dtparser.parse(pub)
             except Exception:
-                pass
+                return datetime.min
 
-        items.append({
-            "title": title,
-            "link": link,
-            # "summary": summary,
-            "published": published,
-            "query": query,   # 👈 add back so payload has context
-        })
-    return items
+        deduped.sort(key=sort_key, reverse=True)
+        return deduped
 
 
-def harvest_articles(terms: List[str]) -> List[Dict[str, Any]]:
-    all_items = []
-    for q in terms:
-        try:
-            items = fetch_rss_for_query(q)
-            all_items.extend(items)
-            time.sleep(0.4)
-        except Exception as e:
-            print(f"[warn] RSS fetch failed for: {q} :: {e}", file=sys.stderr)
+    def filter_by_window(
+        items: List[Dict[str, Any]],
+        days: int,
+        exclude_days: int = 0
+    ) -> List[Dict[str, Any]]:
+        """
+        Keep articles from the past `days` (inclusive),
+        but exclude anything in the most recent `exclude_days`.
+        Example: days=30, exclude_days=7 → covers 8–30 days ago.
+        Handles 'YYYY-MM-DD' or full ISO timestamps.
+        """
+        now = datetime.now(timezone.utc)
+        since = now - timedelta(days=days)
+        exclude_after = now - timedelta(days=exclude_days) if exclude_days else None
 
-    # Deduplicate by link or title
-    seen = set()
-    deduped = []
-    for it in all_items:
-        key = it.get("link") or it.get("title")
-        if key and key not in seen:
-            seen.add(key)
-            deduped.append(it)
+        kept: List[tuple[datetime, Dict[str, Any]]] = []
 
-    # Sort by published date (newest first)
-    def sort_key(it):
-        pub = it.get("published")
-        if not pub:
-            return datetime.min  # put undated at the end
-        try:
-            return dtparser.parse(pub)
-        except Exception:
-            return datetime.min
+        for it in items:
+            pub = it.get("published")
+            if not pub:
+                continue
+            try:
+                dt = dtparser.parse(pub)
+            except Exception:
+                continue
 
-    deduped.sort(key=sort_key, reverse=True)
-    return deduped
+            # If parsed datetime has no tz (e.g., just a date), assume UTC midnight
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
 
+            # In-range check
+            if dt < since:
+                continue
+            if exclude_after and dt >= exclude_after:
+                continue
 
-def filter_by_window(
-    items: List[Dict[str, Any]],
-    days: int,
-    exclude_days: int = 0
-) -> List[Dict[str, Any]]:
-    """
-    Keep articles from the past `days` (inclusive),
-    but exclude anything in the most recent `exclude_days`.
-    Example: days=30, exclude_days=7 → covers 8–30 days ago.
-    Handles 'YYYY-MM-DD' or full ISO timestamps.
-    """
-    now = datetime.now(timezone.utc)
-    since = now - timedelta(days=days)
-    exclude_after = now - timedelta(days=exclude_days) if exclude_days else None
+            kept.append((dt, it))
 
-    kept: List[tuple[datetime, Dict[str, Any]]] = []
+        # Sort newest → oldest using the parsed datetime (not the raw string)
+        kept.sort(key=lambda x: x[0], reverse=True)
 
-    for it in items:
-        pub = it.get("published")
-        if not pub:
-            continue
-        try:
-            dt = dtparser.parse(pub)
-        except Exception:
-            continue
+        # Apply window cap
+        return [it for _, it in kept[:MAX_ARTICLES_PER_WINDOW]]
 
-        # If parsed datetime has no tz (e.g., just a date), assume UTC midnight
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-
-        # In-range check
-        if dt < since:
-            continue
-        if exclude_after and dt >= exclude_after:
-            continue
-
-        kept.append((dt, it))
-
-    # Sort newest → oldest using the parsed datetime (not the raw string)
-    kept.sort(key=lambda x: x[0], reverse=True)
-
-    # Apply window cap
-    return [it for _, it in kept[:MAX_ARTICLES_PER_WINDOW]]
-
-def make_prompt_payload(window_name: str, items: List[Dict[str, Any]], include_link: bool) -> Dict[str, Any]:
-    if include_link:
-        articles = [
-            {"title": it["title"], "link": it["link"], "published": it["published"], "query": it["query"]}
-            # {"title": it["title"], "published": it["published"], "query": it["query"]}
-            for it in items
-        ]
-    else:
-        articles = [
-            {"title": it["title"], "published": it["published"], "query": it["query"]}
-            for it in items
-        ]
-    return {"window": window_name, "count": len(articles), "articles": articles}
+    def make_prompt_payload(window_name: str, items: List[Dict[str, Any]], include_link: bool) -> Dict[str, Any]:
+        if include_link:
+            articles = [
+                {"title": it["title"], "link": it["link"], "published": it["published"], "query": it["query"]}
+                # {"title": it["title"], "published": it["published"], "query": it["query"]}
+                for it in items
+            ]
+        else:
+            articles = [
+                {"title": it["title"], "published": it["published"], "query": it["query"]}
+                for it in items
+            ]
+        return {"window": window_name, "count": len(articles), "articles": articles}
 
 
-def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
-    from openai import OpenAI
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    system = (
-        "You are a senior editor focusing on psychometrics, educational measurement, and psychological assessment news. "
-        "Prioritize: policy, legislation, politics, testing reforms, professional society updates, career news, "
-        "and media coverage. De-emphasize technical studies unless directly relevant. "
-        "Summarize the important news and trends in a paragraph for each time window. "
-        "Specify the country being discussed. Focus on United States but include some international news. "
-        # "Many articles will be recent articles, so pay attention to the published dates and make sure your summary covers the entire timeframe."
-        "\n\n"
-        "Output format rules:\n"
-        "- Use plain text and copy the following heading:\n"
-        "  ## :newspaper2: Past 7 Days\n"
-        "- Under the heading, write one summary paragraph.\n"
-        "- Under the summary paragraph, list of 8 important sources in this format. Keep the source title unchanged.\n"
-        " * Source Title\n"
-        " * Source Title\n"
-        " * Source Title\n"
-        " * Source Title\n"
-        " * Source Title\n"        
-        " * Source Title\n"
-        " * Source Title\n"
-        " * Source Title\n"
-    )
+    def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
+        from openai import OpenAI
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        system = (
+            "You are a senior editor focusing on psychometrics, educational measurement, and psychological assessment news. "
+            "Prioritize: policy, legislation, politics, testing reforms, professional society updates, career news, "
+            "and media coverage. De-emphasize technical studies unless directly relevant. "
+            "Summarize the important news and trends in a paragraph for each time window. "
+            "Specify the country being discussed. Focus on United States but include some international news. "
+            # "Many articles will be recent articles, so pay attention to the published dates and make sure your summary covers the entire timeframe."
+            "\n\n"
+            "Output format rules:\n"
+            "- Use plain text and copy the following heading:\n"
+            "  ## :newspaper2: Past 7 Days\n"
+            "- Under the heading, write one summary paragraph.\n"
+            "- Under the summary paragraph, list of up to 8 important sources in this format. Keep the source title unchanged.\n"
+            " * Source Title\n"
+            " * Source Title\n"
+            " * Source Title\n"
+            " * Source Title\n"
+            " * Source Title\n"        
+            " * Source Title\n"
+            " * Source Title\n"        
+            " * Source Title\n"
+        )
 
-    user_input = {
-        "task": "Summarize psychometrics/assessment-related news.",
-        "windows": windows_payload,
-    }
+        user_input = {
+            "task": "Summarize psychometrics/assessment-related news.",
+            "windows": windows_payload,
+        }
 
-    # Try up to 3 times on flex, then fallback to default
-    for attempt in range(3):
-        try:
-            print(f"[i] Attempt {attempt+1} with flex tier...")
+        # Try up to 3 times on flex, then fallback to default
+        for attempt in range(3):
+            try:
+                print(f"[i] Attempt {attempt+1} with flex tier...")
+                resp = client.responses.create(
+                    model=model,
+                    input=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
+                    ],
+                    # temperature=0.25, # gpt-5-nano/mini doesnt have temperature
+                    service_tier="flex",
+                )
+                break  # success
+            except Exception as e:
+                print(f"[warn] flex attempt {attempt+1} failed: {e}")
+                time.sleep(30)  # wait before retry
+        else:
+            # All flex attempts failed → fallback to default
+            print("[i] Falling back to default tier...")
             resp = client.responses.create(
                 model=model,
                 input=[
@@ -268,138 +287,122 @@ def summarize_with_openai(model: str, windows_payload: Dict[str, Any]) -> str:
                     {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
                 ],
                 # temperature=0.25, # gpt-5-nano/mini doesnt have temperature
-                service_tier="flex",
+                service_tier="default",
             )
-            break  # success
-        except Exception as e:
-            print(f"[warn] flex attempt {attempt+1} failed: {e}")
-            time.sleep(30)  # wait before retry
-    else:
-        # All flex attempts failed → fallback to default
-        print("[i] Falling back to default tier...")
-        resp = client.responses.create(
-            model=model,
-            input=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
-            ],
-            # temperature=0.25, # gpt-5-nano/mini doesnt have temperature
-            service_tier="default",
-        )
 
-    # Extract text output
-    parts = []
-    # Preferred: direct output_text if available
-    if hasattr(resp, "output_text") and resp.output_text:
-        parts.append(resp.output_text)
-    # Fallback: loop through structured outputs
-    elif hasattr(resp, "output") and resp.output:
-        for o in resp.output:
-            if hasattr(o, "content") and o.content:
-                for c in o.content:
-                    if c.type == "output_text":
-                        parts.append(c.text)
-    return "\n".join(parts).strip()
+        # Extract text output
+        parts = []
+        # Preferred: direct output_text if available
+        if hasattr(resp, "output_text") and resp.output_text:
+            parts.append(resp.output_text)
+        # Fallback: loop through structured outputs
+        elif hasattr(resp, "output") and resp.output:
+            for o in resp.output:
+                if hasattr(o, "content") and o.content:
+                    for c in o.content:
+                        if c.type == "output_text":
+                            parts.append(c.text)
+        return "\n".join(parts).strip()
 
-def post_to_discord(webhook_url: str, content: str):
-    MAX_LEN = 2000
+    def post_to_discord(webhook_url: str, content: str):
+        MAX_LEN = 2000
 
-    # Split into safe chunks
-    chunks = []
-    while len(content) > MAX_LEN:
-        # Try to break at last newline before limit
-        split_at = content.rfind("\n", 0, MAX_LEN)
-        if split_at == -1:
-            split_at = MAX_LEN
-        chunks.append(content[:split_at])
-        content = content[split_at:].lstrip()
-    chunks.append(content)  # last piece
+        # Split into safe chunks
+        chunks = []
+        while len(content) > MAX_LEN:
+            # Try to break at last newline before limit
+            split_at = content.rfind("\n", 0, MAX_LEN)
+            if split_at == -1:
+                split_at = MAX_LEN
+            chunks.append(content[:split_at])
+            content = content[split_at:].lstrip()
+        chunks.append(content)  # last piece
 
-    # Send each chunk
-    for i, chunk in enumerate(chunks, 1):
-        msg = chunk
-        print(msg)
-        # if len(chunks) > 1:
-        #     msg = f"**Part {i}/{len(chunks)}**\n{msg}"
+        # Send each chunk
+        for i, chunk in enumerate(chunks, 1):
+            msg = chunk
+            print(msg)
+            # if len(chunks) > 1:
+            #     msg = f"**Part {i}/{len(chunks)}**\n{msg}"
 
-        try:
-            r = requests.post(
-                webhook_url,
-                headers={"Content-Type": "application/json"},
-                json={"content": msg},
-                timeout=HTTP_TIMEOUT
-            )
-            r.raise_for_status()
-            print(f"[ok] posted chunk {i}/{len(chunks)}")
-        except Exception as e:
-            print(f"[warn] Failed to post chunk {i}: {e}", file=sys.stderr)
-            print(f"[debug] Chunk content (first 200 chars):\n{msg[:200]}...\n")
-            break
+            try:
+                r = requests.post(
+                    webhook_url,
+                    headers={"Content-Type": "application/json"},
+                    json={"content": msg},
+                    timeout=HTTP_TIMEOUT
+                )
+                r.raise_for_status()
+                print(f"[ok] posted chunk {i}/{len(chunks)}")
+            except Exception as e:
+                print(f"[warn] Failed to post chunk {i}: {e}", file=sys.stderr)
+                print(f"[debug] Chunk content (first 200 chars):\n{msg[:200]}...\n")
+                break
 
-        # Delay between messages to avoid rate limiting
-        if i < len(chunks):
-            time.sleep(1)
+            # Delay between messages to avoid rate limiting
+            if i < len(chunks):
+                time.sleep(1)
 
-    print(f"[ok] finished posting {len(chunks)} message(s) to Discord")
+        print(f"[ok] finished posting {len(chunks)} message(s) to Discord")
 
 
-def wrap_links_with_angle_brackets(text: str) -> str:
-    """
-    Ensure every Markdown-style [title](link) has <> around the link.
-    Example: [Example](https://example.com) → [Example](<https://example.com>)
-    """
-    pattern = r'(\[.*?\]\()([^)]+)(\))'
-    return re.sub(pattern, lambda m: f"{m.group(1)}<{m.group(2)}>{m.group(3)}", text)
+    def wrap_links_with_angle_brackets(text: str) -> str:
+        """
+        Ensure every Markdown-style [title](link) has <> around the link.
+        Example: [Example](https://example.com) → [Example](<https://example.com>)
+        """
+        pattern = r'(\[.*?\]\()([^)]+)(\))'
+        return re.sub(pattern, lambda m: f"{m.group(1)}<{m.group(2)}>{m.group(3)}", text)
 
 
-def ensure_blank_before_headers(text: str) -> str:
-    return re.sub(r'(?<!\n)\n?(## )', r'\n\n\1', text)
+    def ensure_blank_before_headers(text: str) -> str:
+        return re.sub(r'(?<!\n)\n?(## )', r'\n\n\1', text)
 
 
-def normalize_title(title: str) -> str:
-    # Lowercase + strip punctuation and whitespace
-    return re.sub(rf"[{re.escape(string.punctuation)}\s]+", "", title.lower())
+    def normalize_title(title: str) -> str:
+        # Lowercase + strip punctuation and whitespace
+        return re.sub(rf"[{re.escape(string.punctuation)}\s]+", "", title.lower())
 
-def attach_real_links(text: str, all_items: list[dict]) -> str:
-    # Build lookup table from normalized title → link
-    title_to_link = {
-        normalize_title(it["title"]): it["link"]
-        for it in all_items if it.get("title") and it.get("link")
-    }
+    def attach_real_links(text: str, all_items: list[dict]) -> str:
+        # Build lookup table from normalized title → link
+        title_to_link = {
+            normalize_title(it["title"]): it["link"]
+            for it in all_items if it.get("title") and it.get("link")
+        }
 
-    lines = []
-    for raw_line in text.splitlines():
-        candidate = raw_line.strip()
-        if not candidate:
-            lines.append(raw_line)
-            continue
+        lines = []
+        for raw_line in text.splitlines():
+            candidate = raw_line.strip()
+            if not candidate:
+                lines.append(raw_line)
+                continue
 
-        # Extract [Title](link) if GPT already formatted it
-        linked = re.match(r'^\*?\s*\[(.+?)\]\((.*?)\)$', candidate)
-        if linked:
-            visible_title = linked.group(1).strip()
-        else:
-            visible_title = candidate.lstrip("-*• ").strip()
+            # Extract [Title](link) if GPT already formatted it
+            linked = re.match(r'^\*?\s*\[(.+?)\]\((.*?)\)$', candidate)
+            if linked:
+                visible_title = linked.group(1).strip()
+            else:
+                visible_title = candidate.lstrip("-*• ").strip()
 
-        norm = normalize_title(visible_title)
-        link = title_to_link.get(norm)
+            norm = normalize_title(visible_title)
+            link = title_to_link.get(norm)
 
-        if link:
-            # Ensure Discord-friendly link wrapping
-            lines.append(f"* [{visible_title}](<{link}>)")
-        else:
-            # Keep line untouched if no match
-            lines.append(raw_line)
+            if link:
+                # Ensure Discord-friendly link wrapping
+                lines.append(f"* [{visible_title}](<{link}>)")
+            else:
+                # Keep line untouched if no match
+                lines.append(raw_line)
 
-    return "\n".join(lines)
+        return "\n".join(lines)
 
 
 # -----------------------------
 # Main
 # -----------------------------
-def main():
+# def main():
     # Monday-only guard
-    if datetime.today().weekday() != 0:  # Monday=0
+    if not today_is_monday:  # Monday=0
         print("[i] Not Monday → skipping digest.")
         return
 
@@ -453,7 +456,7 @@ def main():
     # report = wrap_links_with_angle_brackets(report)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7)} Articles"
+    header = f"# Monday News Digest\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7)} Articles"
     # header = f"# Monday News Digest\n<@&1421877783012970556>\nGenerated: {now}\nModel: {OPENAI_MODEL}\nSummarized: {len(last_7) + len(last_60) + len(last_365)} Articles"
     report_txt = header + report
 
@@ -463,8 +466,8 @@ def main():
         except Exception as e:
             print(f"[warn] Discord post failed: {e}", file=sys.stderr)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
 
 
