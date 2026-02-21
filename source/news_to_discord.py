@@ -244,14 +244,13 @@ def gpt_news(today_is_monday, DISCORD_WEBHOOK_URL):
             "- Use plain text and copy the following heading:\n"
             "  ## :newspaper2: Past 7 Days\n"
             "- Under the heading, write one summary paragraph.\n"
-            "- Under the summary paragraph, list of up to 8 important sources in this format. Keep the source title unchanged.\n"
+            "- Under the summary paragraph, list 7 important sources in this format. Keep the source title unchanged.\n"
             " * Source Title\n"
             " * Source Title\n"
             " * Source Title\n"
             " * Source Title\n"
             " * Source Title\n"        
             " * Source Title\n"
-            " * Source Title\n"        
             " * Source Title\n"
         )
 
