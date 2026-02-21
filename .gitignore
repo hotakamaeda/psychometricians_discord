@@ -21,3 +21,6 @@ archive/
 conference_post_log.txt
 harvest_debugwindows_payload.json
 posted_jobs.json
+/source/__pycache__
+seen_articles_weekly.json
+source/papers_to_discord_weekly.py
