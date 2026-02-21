@@ -18,8 +18,8 @@ today_et = datetime.now(eastern).date()
 today_is_monday = today_et.weekday() == 0
 
 # Uncomment this is for testing purposes ---------
-DISCORD_WEBHOOK_NEWS = os.getenv("DISCORD_WEBHOOK_DRAFT")
-DISCORD_WEBHOOK_ANNOUNCEMENTS = os.getenv("DISCORD_WEBHOOK_DRAFT")
+# DISCORD_WEBHOOK_NEWS = os.getenv("DISCORD_WEBHOOK_DRAFT")
+# DISCORD_WEBHOOK_ANNOUNCEMENTS = os.getenv("DISCORD_WEBHOOK_DRAFT")
 # today_is_monday = True
 
 # ------- Run ------
