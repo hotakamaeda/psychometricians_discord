@@ -209,9 +209,9 @@ async def schedule_weekly_voice_chat():
             name=WEEKLY_VOICE_EVENT_NAME,
             start_time=start_utc,
             end_time=end_utc,
-            description="Chat about psychometrics, research, or off-topic things! Video is optional."
-                        "Have fun! :stuck_out_tongue_winking_eye:"
-                        "Schedule alternates between 12pm ET / 9pm ET based on even/odd days since January 1st.",
+            description="Chat about psychometrics, research, or off-topic things! Video is optional! "
+                        "\nHave fun! :stuck_out_tongue_winking_eye: "
+                        "\nSchedule alternates between 12pm ET / 9pm ET depending on even/odd days since January 1st. ",
             privacy_level=discord.PrivacyLevel.guild_only,
             entity_type=discord.EntityType.voice,
             channel=channel,  # <-- THIS is how discord.py sets channel_id under the hood
