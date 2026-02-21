@@ -13,7 +13,10 @@ def monday_alerts_end(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
     response = requests.post(
         DISCORD_WEBHOOK_ANNOUNCEMENTS,
         json={
-            "content": "That's all the Monday announcements.\nHave a nice week! 😄"
+            "content": "That's all the Monday announcements @everyone!\nHave a nice week! 😄",
+            "allowed_mentions": {
+                "parse": ["everyone"]  # 👈 REQUIRED
+            }
         }
     )
 
