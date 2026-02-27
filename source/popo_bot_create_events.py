@@ -210,6 +210,7 @@ async def schedule_weekly_voice_chat():
             start_time=start_utc,
             end_time=end_utc,
             description="Chat about psychometrics, research, or off-topic things! Video is optional! If we get too many people, split up the group by using Voice channels 2 and 3. "
+                        "\nIt's ok if you don't wanna talk! Just listen to people chatting like a podcast! "
                         "\nHave fun! :stuck_out_tongue_winking_eye: "
                         "\nSchedule alternates between 12pm ET / 9pm ET depending on even/odd days since January 1st. ",
             privacy_level=discord.PrivacyLevel.guild_only,
