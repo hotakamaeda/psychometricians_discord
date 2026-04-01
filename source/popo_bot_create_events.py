@@ -186,17 +186,24 @@ async def schedule_weekly_voice_chat():
     today_et = now_et.date()
     days_ahead = (3 - today_et.weekday()) % 7  # Thursday=3
     next_thursday = today_et + timedelta(days=days_ahead)
+    next_friday = next_thursday + timedelta(days=1)
 
     # --- NEW: alternate time based on days since Jan 1 (0-based) ---
     jan1 = datetime(next_thursday.year, 1, 1).date()
     days_since_jan1 = (next_thursday - jan1).days  # Jan 1 => 0 (even)
 
+    start_hour = 12 # always 12pm Eastern
     # start_hour = 16 if (days_since_jan1 % 2 == 1) else 12  # odd => 4pm, even => 12pm
-    start_hour = 12 if (days_since_jan1 % 2 == 1) else 12  # always 12pm
 
-    start_et = eastern.localize(
-        datetime(next_thursday.year, next_thursday.month, next_thursday.day, start_hour, 0, 0)
-    )
+    if (days_since_jan1 % 2 == 0): # Thursday
+        start_et = eastern.localize(
+            datetime(next_thursday.year, next_thursday.month, next_thursday.day, start_hour, 0, 0)
+        )
+    else:  # Friday
+        start_et = eastern.localize(
+            datetime(next_friday.year, next_friday.month, next_friday.day, start_hour, 0, 0)
+        )
+
     end_et = start_et + timedelta(hours=1)
     start_utc = start_et.astimezone(utc)
     end_utc = end_et.astimezone(utc)
@@ -212,9 +219,8 @@ async def schedule_weekly_voice_chat():
             end_time=end_utc,
             description="Chat about psychometrics, research, or off-topic things! Video is optional! If we get too many people, split up the group by using Voice channels 2 and 3. "
                         "\nIt's ok if you don't wanna talk! Just listen to people chatting like a podcast! "
-                        "\nHave fun! :stuck_out_tongue_winking_eye: "
-                        "\nThursdays 12pm ET for now. Subject to change. ",
-                        # "\nSchedule alternates between 12pm ET / 4pm ET depending on even/odd days since January 1st. ",
+                        "\nHave fun! :stuck_out_tongue_winking_eye: " 
+                        "\nSchedule alternates between 12pm ET Thursday and Friday (depending on even/odd days since January 1st). ",
             privacy_level=discord.PrivacyLevel.guild_only,
             entity_type=discord.EntityType.voice,
             channel=channel,  # <-- THIS is how discord.py sets channel_id under the hood
