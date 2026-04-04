@@ -192,14 +192,13 @@ async def schedule_weekly_voice_chat():
     jan1 = datetime(next_thursday.year, 1, 1).date()
     days_since_jan1 = (next_thursday - jan1).days  # Jan 1 => 0 (even)
 
-    start_hour = 12 # always 12pm Eastern
-    # start_hour = 16 if (days_since_jan1 % 2 == 1) else 12  # odd => 4pm, even => 12pm
-
     if (days_since_jan1 % 2 == 0): # Thursday
+        start_hour = 12  # 12pm Eastern
         start_et = eastern.localize(
             datetime(next_thursday.year, next_thursday.month, next_thursday.day, start_hour, 0, 0)
         )
     else:  # Friday
+        start_hour = 13  # 1pm Eastern
         start_et = eastern.localize(
             datetime(next_friday.year, next_friday.month, next_friday.day, start_hour, 0, 0)
         )
@@ -220,7 +219,7 @@ async def schedule_weekly_voice_chat():
             description="Chat about psychometrics, research, or off-topic things! Video is optional! If we get too many people, split up the group by using Voice channels 2 and 3. "
                         "\nIt's ok if you don't wanna talk! Just listen to people chatting like a podcast! "
                         "\nHave fun! :stuck_out_tongue_winking_eye: " 
-                        "\nSchedule alternates between 12pm ET Thursday and Friday (depending on even/odd days since January 1st). ",
+                        "\nSchedule alternates between 12pm ET Thursday and 1pm ET Friday (depending on even/odd days since January 1st). ",
             privacy_level=discord.PrivacyLevel.guild_only,
             entity_type=discord.EntityType.voice,
             channel=channel,  # <-- THIS is how discord.py sets channel_id under the hood
