@@ -11,7 +11,7 @@ import requests
 # ---- Config ----
 load_dotenv()
 
-def event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
+def event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS, DISCORD_WEBHOOK_GENERAL_EVENT):
 
     TOKEN = os.getenv("popo_token")
     intents = discord.Intents.default()
@@ -28,6 +28,22 @@ def event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
 
         response = requests.post(
             DISCORD_WEBHOOK_ANNOUNCEMENTS,
+            json={"content": content},
+            timeout=10  # optional but recommended
+        )
+
+        # Discord webhook success is usually 204 No Content (sometimes 200)
+        if response.status_code not in (200, 204):
+            print(f"Webhook failed: {response.status_code} {response.text}")
+
+    def webhook_send_general(content: str):
+        """Send a plain message to Discord via webhook."""
+        if not DISCORD_WEBHOOK_GENERAL_EVENT:
+            print("Missing DISCORD_WEBHOOK_GENERAL_EVENT in environment.")
+            return
+
+        response = requests.post(
+            DISCORD_WEBHOOK_GENERAL_EVENT,
             json={"content": content},
             timeout=10  # optional but recommended
         )
@@ -72,11 +88,13 @@ def event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS):
             print("Events Today")
             await asyncio.sleep(.3)
             webhook_send("# :date: **Events Today!**")
+            webhook_send_general("# :date: **Events Today!**")
             for e in todays_events:
                 if hasattr(e, "url"):
                     event_link = e.url
                     await asyncio.sleep(.3)
                     webhook_send(event_link)
+                    webhook_send_general(event_link)
 
         # Weekly event list sent only on Mondays
         if this_week_events and today_is_monday:

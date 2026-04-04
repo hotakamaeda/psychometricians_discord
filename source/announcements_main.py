@@ -11,6 +11,7 @@ from source.monday_alerts_end import monday_alerts_end
 load_dotenv()
 DISCORD_WEBHOOK_NEWS = os.getenv("DISCORD_WEBHOOK_NEWS")
 DISCORD_WEBHOOK_ANNOUNCEMENTS = os.getenv("DISCORD_WEBHOOK_ANNOUNCEMENTS")
+DISCORD_WEBHOOK_GENERAL_EVENT = os.getenv("DISCORD_WEBHOOK_GENERAL_EVENT")
 
 # Is today Monday? (Eastern time) ----
 eastern = pytz.timezone("US/Eastern")
@@ -26,7 +27,7 @@ today_is_monday = today_et.weekday() == 0
 def main():
     # Run individual scripts
     gpt_news(today_is_monday, DISCORD_WEBHOOK_NEWS)
-    event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS)
+    event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS, DISCORD_WEBHOOK_GENERAL_EVENT)
     conference_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS)
     monday_alerts_end(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS)
 
