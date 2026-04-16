@@ -21,6 +21,7 @@ intents.guilds = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 VOICE_CHANNEL_ID = int(os.getenv("VOICE_CHANNEL_ID"))
 WEEKLY_VOICE_EVENT_NAME = "Weekly voice/video chat!"
+WEEKLY_TEXT_EVENT_NAME = "Weekly Text Chat!"
 
 # Currently creates only NCME events
 
@@ -206,6 +207,8 @@ async def schedule_weekly_voice_chat():
     end_et = start_et + timedelta(hours=1)
     start_utc = start_et.astimezone(utc)
     end_utc = end_et.astimezone(utc)
+    with open("voice.jpg", "rb") as f:
+        image_bytes = f.read()
 
     try:
         channel = bot.get_channel(VOICE_CHANNEL_ID)
@@ -223,6 +226,7 @@ async def schedule_weekly_voice_chat():
             privacy_level=discord.PrivacyLevel.guild_only,
             entity_type=discord.EntityType.voice,
             channel=channel,  # <-- THIS is how discord.py sets channel_id under the hood
+            image=image_bytes
         )
         msg = (
             f"## :date: **New Voice Chat Event!**\n"
@@ -235,6 +239,74 @@ async def schedule_weekly_voice_chat():
         print(f"Error creating weekly voice chat: {e}")
 
 
+
+async def schedule_weekly_text_chat():
+    eastern = pytz.timezone("US/Eastern")
+    utc = pytz.utc
+
+    guild = bot.guilds[0] if bot.guilds else None
+    if guild is None:
+        print("No guild found. Bot may not be in the server yet.")
+        return
+
+    # Don't schedule if an event with the same name already exists
+    existing_events = await guild.fetch_scheduled_events()
+    if any(ev.name == WEEKLY_TEXT_EVENT_NAME for ev in existing_events):
+        print(f"'{WEEKLY_TEXT_EVENT_NAME}' already exists. Skipping.")
+        return
+
+    # Find the next Tuesday (ET)
+    now_et = datetime.now(eastern)
+    today_et = now_et.date()
+    days_ahead = (1 - today_et.weekday()) % 7  # Tuesday=1
+    next_thursday = today_et + timedelta(days=days_ahead)
+    next_friday = next_thursday + timedelta(days=1)
+
+    # --- NEW: alternate time based on days since Jan 1 (0-based) ---
+    jan1 = datetime(next_thursday.year, 1, 1).date()
+    days_since_jan1 = (next_thursday - jan1).days  # Jan 1 => 0 (even)
+
+    if (days_since_jan1 % 2 == 0): # Tuesday
+        start_hour = 12  # 12pm Eastern
+        start_et = eastern.localize(
+            datetime(next_thursday.year, next_thursday.month, next_thursday.day, start_hour, 0, 0)
+        )
+    else:  # Wednesday
+        start_hour = 13  # 1pm Eastern
+        start_et = eastern.localize(
+            datetime(next_friday.year, next_friday.month, next_friday.day, start_hour, 0, 0)
+        )
+
+    end_et = start_et + timedelta(hours=1)
+    start_utc = start_et.astimezone(utc)
+    end_utc = end_et.astimezone(utc)
+    with open("text.jpg", "rb") as f:
+        image_bytes = f.read()
+
+    try:
+        created = await guild.create_scheduled_event(
+            name=WEEKLY_TEXT_EVENT_NAME,
+            start_time=start_utc,
+            end_time=end_utc,
+            description="Chat about psychometrics, research, or off-topic things! It's a chance to text-chat live with members. Feel free to use any text channel. "
+                        "Have fun! :stuck_out_tongue_winking_eye: " 
+                        "\nSchedule alternates between 12pm ET Tuesday and 1pm ET Wednesday (depending on even/odd days since January 1st). ",
+            privacy_level=discord.PrivacyLevel.guild_only,
+            entity_type=discord.EntityType.external,
+            location="#⭐general",
+            image=image_bytes
+        )
+        msg = (
+            f"## :date: **New Text Chat Event!**\n"
+            f"{created.url}"
+        )
+        webhook_send(msg)
+        await asyncio.sleep(0.3)
+        print("created Weekly Text chat")
+    except Exception as e:
+        print(f"Error creating weekly text chat: {e}")
+
+
 # ---- Bot Ready ----
 @bot.event
 async def on_ready():
@@ -242,6 +314,7 @@ async def on_ready():
     await asyncio.sleep(2)
     await schedule_events(events)
     await schedule_weekly_voice_chat()
+    await schedule_weekly_text_chat()
     await bot.close()
     print(f"Logged out bot")
 
