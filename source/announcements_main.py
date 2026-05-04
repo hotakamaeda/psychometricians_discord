@@ -26,7 +26,7 @@ today_is_monday = today_et.weekday() == 0
 # ------- Run ------
 def main():
     # Run individual scripts
-    gpt_news(today_is_monday, DISCORD_WEBHOOK_NEWS)
+    # gpt_news(today_is_monday, DISCORD_WEBHOOK_NEWS)
     event_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS, DISCORD_WEBHOOK_GENERAL_EVENT)
     conference_alerts(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS)
     monday_alerts_end(today_is_monday, DISCORD_WEBHOOK_ANNOUNCEMENTS)
