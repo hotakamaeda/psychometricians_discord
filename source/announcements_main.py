@@ -2,14 +2,14 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 import pytz  # pip install pytz
-from source.news_to_discord import gpt_news
+# from source.news_to_discord import gpt_news
 from source.popo_bot_event_alerts import event_alerts
 from source.popo_bot_conference_date_alerts import conference_alerts
 from source.monday_alerts_end import monday_alerts_end
 
 # ---- Config ----
 load_dotenv()
-DISCORD_WEBHOOK_NEWS = os.getenv("DISCORD_WEBHOOK_NEWS")
+# DISCORD_WEBHOOK_NEWS = os.getenv("DISCORD_WEBHOOK_NEWS")
 DISCORD_WEBHOOK_ANNOUNCEMENTS = os.getenv("DISCORD_WEBHOOK_ANNOUNCEMENTS")
 DISCORD_WEBHOOK_GENERAL_EVENT = os.getenv("DISCORD_WEBHOOK_GENERAL_EVENT")
 
