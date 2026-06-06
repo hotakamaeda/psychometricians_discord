@@ -20,8 +20,8 @@ intents.members = True
 intents.guilds = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 VOICE_CHANNEL_ID = int(os.getenv("VOICE_CHANNEL_ID"))
-WEEKLY_VOICE_EVENT_NAME = "Weekly voice/video chat!"
-WEEKLY_TEXT_EVENT_NAME = "Weekly Text Chat!"
+WEEKLY_VOICE_EVENT_NAME = "Biweekly voice/video chat!"
+WEEKLY_TEXT_EVENT_NAME = "Biweekly Text Chat!"
 
 # Currently creates only NCME events
 
@@ -182,18 +182,16 @@ async def schedule_weekly_voice_chat():
         print(f"'{WEEKLY_VOICE_EVENT_NAME}' already exists. Skipping.")
         return
 
-    # Find the next Thursday (ET)
+    # Find the next next Thursday (ET). BIWEEKLY
     now_et = datetime.now(eastern)
     today_et = now_et.date()
-    days_ahead = (3 - today_et.weekday()) % 7  # Thursday=3
+    days_ahead = 7 + ((3 - today_et.weekday()) % 7)  # Thursday=3. +7 makes it next next week
     next_thursday = today_et + timedelta(days=days_ahead)
     next_friday = next_thursday + timedelta(days=1)
 
-    # --- NEW: alternate time based on days since Jan 1 (0-based) ---
-    jan1 = datetime(next_thursday.year, 1, 1).date()
-    days_since_jan1 = (next_thursday - jan1).days  # Jan 1 => 0 (even)
-
-    if (days_since_jan1 % 2 == 0): # Thursday
+    # --- Alternate time based on weeks since Jan 1 ---
+    iso_week = next_thursday.isocalendar()[1]  # 1-based week number
+    if (iso_week % 4 == 0) or ((iso_week + 1) % 4 == 0):  # This finds the Thursday weeks
         start_hour = 12  # 12pm Eastern
         start_et = eastern.localize(
             datetime(next_thursday.year, next_thursday.month, next_thursday.day, start_hour, 0, 0)
@@ -222,7 +220,7 @@ async def schedule_weekly_voice_chat():
             description="Chat about psychometrics, research, or off-topic things! Video is optional! If we get too many people, split up the group by using Voice channels 2 and 3. "
                         "\nIt's ok if you don't wanna talk! Just listen to people chatting like a podcast! "
                         "\nHave fun! :stuck_out_tongue_winking_eye: " 
-                        "\nSchedule alternates between 12pm ET Thursday and 1pm ET Friday (depending on even/odd days since January 1st). ",
+                        "\nSchedule alternates between 12pm ET Thursday and 1pm ET Friday",
             privacy_level=discord.PrivacyLevel.guild_only,
             entity_type=discord.EntityType.voice,
             channel=channel,  # <-- THIS is how discord.py sets channel_id under the hood
@@ -255,26 +253,24 @@ async def schedule_weekly_text_chat():
         print(f"'{WEEKLY_TEXT_EVENT_NAME}' already exists. Skipping.")
         return
 
-    # Find the next Tuesday (ET)
+    # Find the next Tuesday (ET). BIWEEKLY
     now_et = datetime.now(eastern)
     today_et = now_et.date()
-    days_ahead = (1 - today_et.weekday()) % 7  # Tuesday=1
-    next_thursday = today_et + timedelta(days=days_ahead)
-    next_friday = next_thursday + timedelta(days=1)
+    days_ahead = 7 + ((1 - today_et.weekday()) % 7)  # Tuesday=1. +7 makes it next next week
+    next_tuesday = today_et + timedelta(days=days_ahead)
+    next_wednesday = next_tuesday + timedelta(days=1)
 
-    # --- NEW: alternate time based on days since Jan 1 (0-based) ---
-    jan1 = datetime(next_thursday.year, 1, 1).date()
-    days_since_jan1 = (next_thursday - jan1).days  # Jan 1 => 0 (even)
-
-    if (days_since_jan1 % 2 == 0): # Tuesday
+    # --- Alternate time based on weeks since Jan 1 ---
+    iso_week = next_tuesday.isocalendar()[1]  # 1-based week number
+    if (iso_week % 4 == 0) or ((iso_week + 1) % 4 == 0):  # This finds the Thursday weeks
         start_hour = 12  # 12pm Eastern
         start_et = eastern.localize(
-            datetime(next_thursday.year, next_thursday.month, next_thursday.day, start_hour, 0, 0)
+            datetime(next_tuesday.year, next_tuesday.month, next_tuesday.day, start_hour, 0, 0)
         )
     else:  # Wednesday
         start_hour = 13  # 1pm Eastern
         start_et = eastern.localize(
-            datetime(next_friday.year, next_friday.month, next_friday.day, start_hour, 0, 0)
+            datetime(next_wednesday.year, next_wednesday.month, next_wednesday.day, start_hour, 0, 0)
         )
 
     end_et = start_et + timedelta(hours=1)
@@ -290,7 +286,7 @@ async def schedule_weekly_text_chat():
             end_time=end_utc,
             description="Chat about psychometrics, research, or off-topic things! It's a chance to text-chat live with members. Feel free to use any text channel. "
                         "Have fun! :stuck_out_tongue_winking_eye: " 
-                        "\nSchedule alternates between 12pm ET Tuesday and 1pm ET Wednesday (depending on even/odd days since January 1st). ",
+                        "\nSchedule alternates between 12pm ET Tuesday and 1pm ET Wednesday ",
             privacy_level=discord.PrivacyLevel.guild_only,
             entity_type=discord.EntityType.external,
             location="#⭐general",
