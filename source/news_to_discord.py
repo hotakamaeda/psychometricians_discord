@@ -30,7 +30,7 @@ def gpt_news(today_is_monday, DISCORD_WEBHOOK_URL):
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     # DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_NEWS")
     # OPENAI_MODEL = "gpt-5-nano"
-    OPENAI_MODEL = "gpt-5-mini"
+    OPENAI_MODEL = "gpt-5.6-luna"
 
     if not OPENAI_API_KEY:
         print("ERROR: Please set OPENAI_API_KEY in your .env", file=sys.stderr)

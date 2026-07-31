@@ -12,6 +12,7 @@ import glob
 import os
 from dateutil.relativedelta import relativedelta
 import re
+import time
 from typing import List, Tuple
 
 
@@ -57,9 +58,10 @@ def call_gpt(current_info, system_prompt, prompt):
     """Ask GPT to validate if candidate dates are relevant and update JSON."""
     max_retries = 3
     for attempt in range(1, max_retries + 1):
+        time.sleep(1) # wait 1 second
         try:
             resp = client.chat.completions.create(
-                model="gpt-5-nano",
+                model="gpt-5.6-luna",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
