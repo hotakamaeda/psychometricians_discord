@@ -309,8 +309,8 @@ async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
     await asyncio.sleep(2)
     await schedule_events(events)
-    await schedule_weekly_voice_chat()
-    await schedule_weekly_text_chat()
+    # await schedule_weekly_voice_chat()
+    # await schedule_weekly_text_chat()
     await bot.close()
     print(f"Logged out bot")
 
